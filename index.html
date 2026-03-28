@@ -112,7 +112,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);animation:rpl .5s linear;pointer-events:none}
 @keyframes rpl{to{transform:scale(4);opacity:0}}
 /* mishary bar */
-.mishary-bar{background:var(--card);border-bottom:1px solid var(--border);padding:9px 14px 8px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;position:relative;z-index:8;transition:background .45s}
+.mishary-bar{background:var(--card);border-bottom:1px solid var(--border);padding:8px 14px 8px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;position:relative;z-index:8;transition:background .45s}
+.reciter-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.reciter-row::-webkit-scrollbar{display:none}
+.rc-btn{flex-shrink:0;padding:4px 11px;border-radius:99px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.rc-btn.on{background:var(--accent);color:#fff;border-color:var(--accent2)}
 .mishary-top{display:flex;align-items:center;justify-content:space-between}
 .mishary-info{display:flex;align-items:center;gap:9px}
 .mishary-ico{font-size:1.4rem;animation:floaty 3.5s ease-in-out infinite}
@@ -301,11 +305,19 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:999}
 
 <!-- شريط مشاري راشد -->
 <div class="mishary-bar" id="misharyBar">
+  <!-- اختيار القارئ -->
+  <div class="reciter-row" id="reciterRow">
+    <button class="rc-btn on" data-id="mishary" onclick="selectReciter('mishary')">مشاري راشد</button>
+    <button class="rc-btn" data-id="ajami" onclick="selectReciter('ajami')">أحمد العجمي</button>
+    <button class="rc-btn" data-id="sudais" onclick="selectReciter('sudais')">السديس</button>
+    <button class="rc-btn" data-id="maher" onclick="selectReciter('maher')">ماهر المعيقلي</button>
+  </div>
+  <!-- شريط التحكم -->
   <div class="mishary-top">
     <div class="mishary-info">
       <span class="mishary-ico">🎙️</span>
       <div>
-        <div class="mishary-name">مشاري راشد العفاسي</div>
+        <div class="mishary-name" id="reciterName">مشاري راشد العفاسي</div>
         <div class="mishary-sub" id="misharyLabel">أذكار الصباح</div>
       </div>
     </div>
@@ -458,7 +470,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:999}
         <span>✅ <span id="tfSc">0</span>/5</span>
       </div>
       <div class="tf-box">
-        <div class="tf-qnum" id="tfQNum">السؤال 1 من 5</div>
+        <div class="tf-qnum" id="tfQNum">السؤال 1 من 10</div>
         <div class="tf-dhikr" id="tfDhikr"></div>
         <div class="tf-stmt" id="tfStmt"></div>
       </div>
@@ -471,7 +483,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:999}
       <!-- result -->
       <div class="gr" id="tf-gr">
         <div class="gr-ico">🎯</div>
-        <div class="gr-score" id="tfGrSc">0/5</div>
+        <div class="gr-score" id="tfGrSc">0/10</div>
         <div class="gr-msg" id="tfGrMsg"></div>
         <div class="gr-stars" id="tfGrStars"></div>
         <button class="gr-btn" onclick="tfRestart()">🔄 العب مجدداً</button>
@@ -500,7 +512,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:999}
       <!-- result -->
       <div class="gr" id="wo-gr">
         <div class="gr-ico">🔀</div>
-        <div class="gr-score" id="woGrSc">0/4</div>
+        <div class="gr-score" id="woGrSc">0/6</div>
         <div class="gr-msg" id="woGrMsg"></div>
         <div class="gr-stars" id="woGrStars"></div>
         <button class="gr-btn" onclick="woRestart()">🔄 العب مجدداً</button>
@@ -583,27 +595,42 @@ const ADHKAR={
     games:{
       vc:[{title:'التسبيح',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',count:100},{title:'لا إله إلا الله',text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',count:100},{title:'الاستغفار',text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',count:100},{title:'الصلاة على النبي',text:'اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى مُحَمَّدٍ',count:10}],
       tf:[
-        {dhikr:'',stmt:'من قرأ آية الكرسي صباحاً حفظه الله حتى يمسي',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'},
-        {dhikr:'',stmt:'سورة الإخلاص تعدل نصف القرآن الكريم',ans:false,xp:'❌ خطأ! بل تعدل ثُلث القرآن الكريم'},
-        {dhikr:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',stmt:'من قالها مئة مرة غُفرت خطاياه وإن كانت مثل زَبَد البحر',ans:true,xp:'✅ صحيح! حديث متفق عليه'},
-        {dhikr:'',stmt:'حسبي الله يُقال سبع مرات في الصباح والمساء',ans:true,xp:'✅ صحيح! من السنة النبوية'},
-        {dhikr:'',stmt:'من صلى على النبي ﷺ حين يصبح أدركته شفاعته يوم القيامة',ans:true,xp:'✅ صحيح! من السنة النبوية'},
-        {dhikr:'',stmt:'بسم الله الذي لا يضر تُقال مرة واحدة في الصباح',ans:false,xp:'❌ خطأ! تُقال ثلاث مرات صباحاً ومساءً'},
-        {dhikr:'',stmt:'سيد الاستغفار يُقال مرة واحدة صباحاً',ans:true,xp:'✅ صحيح! ومرة مساءً'}
+        {dhikr:'',stmt:'آية الكرسي هي الآية 255 من سورة البقرة',ans:true,xp:'✅ صحيح! وهي أعظم آية في القرآن الكريم'},
+        {dhikr:'',stmt:'من قرأ آية الكرسي صباحاً حفظه الله حتى يمسي',ans:true,xp:'✅ صحيح! قاله النبي ﷺ لأبي هريرة'},
+        {dhikr:'',stmt:'سورة الإخلاص تعدل نصف القرآن الكريم',ans:false,xp:'❌ خطأ! بل تعدل ثُلث القرآن — فضلها عظيم جداً'},
+        {dhikr:'',stmt:'المعوذتان هما سورتا الفلق والناس',ans:true,xp:'✅ صحيح! سُمّيتا المعوذتين لأن كلاً منهما تبدأ بـ «قل أعوذ»'},
+        {dhikr:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',stmt:'من قالها مئة مرة حُطَّت خطاياه وإن كانت مثل زَبَد البحر',ans:true,xp:'✅ صحيح! متفق عليه — حديث صحيح جداً'},
+        {dhikr:'',stmt:'سيد الاستغفار يُقال مرتين في الصباح',ans:false,xp:'❌ خطأ! يُقال مرة واحدة صباحاً ومرة مساءً'},
+        {dhikr:'',stmt:'من قال سيد الاستغفار موقناً به ومات من يومه دخل الجنة',ans:true,xp:'✅ صحيح! رواه البخاري — وهذا سبب تسميته «سيد الاستغفار»'},
+        {dhikr:'',stmt:'حسبي الله تُقال سبع مرات في الصباح والمساء',ans:true,xp:'✅ صحيح! من قالها سبعاً كفاه الله ما أهمه'},
+        {dhikr:'',stmt:'الإشهاد بالتوحيد يُقال أربع مرات صباحاً',ans:true,xp:'✅ صحيح! من قالها أعتقه الله من النار'},
+        {dhikr:'',stmt:'التسبيح الكبير «سبحان الله وبحمده عدد خلقه» يُقال خمس مرات',ans:false,xp:'❌ خطأ! يُقال ثلاث مرات صباحاً ومساءً'},
+        {dhikr:'',stmt:'«رضيتُ بالله رباً» تُقال ثلاث مرات صباحاً',ans:true,xp:'✅ صحيح! وكان حقاً على الله أن يرضيه يوم القيامة'},
+        {dhikr:'',stmt:'الاستغفار العظيم يتضمن اسمَي الله «الحي القيوم»',ans:true,xp:'✅ صحيح! «أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم»'},
+        {dhikr:'',stmt:'دعاء العلم والرزق يطلب ثلاثة أشياء: علماً ورزقاً وعملاً',ans:true,xp:'✅ صحيح! علماً نافعاً ورزقاً طيباً وعملاً متقبلاً'},
+        {dhikr:'',stmt:'من صلى على النبي ﷺ حين يصبح عشر مرات أدركته شفاعته',ans:true,xp:'✅ صحيح! رواه الطبراني — فضل عظيم'},
+        {dhikr:'',stmt:'«أصبحنا على فطرة الإسلام» تنتهي بذكر سيدنا موسى عليه السلام',ans:false,xp:'❌ خطأ! تنتهي بذكر أبينا إبراهيم حنيفاً مسلماً'}
       ],
       wo:[
-        {words:['سُبْحَانَ','اللَّهِ','وَبِحَمْدِهِ'],hint:'التسبيح (3 كلمات)'},
-        {words:['لَا','إِلَهَ','إِلَّا','اللَّهُ'],hint:'التوحيد (4 كلمات)'},
-        {words:['أَصْبَحْنَا','وَأَصْبَحَ','الْمُلْكُ','لِلَّهِ'],hint:'ذكر الصباح (4 كلمات)'},
+        {words:['سُبْحَانَ','اللَّهِ','وَبِحَمْدِهِ'],hint:'التسبيح الخفيف (3 كلمات)'},
+        {words:['لَا','إِلَهَ','إِلَّا','اللَّهُ','وَحْدَهُ','لَا','شَرِيكَ','لَهُ'],hint:'كلمة التوحيد الكاملة (8 كلمات)'},
+        {words:['أَصْبَحْنَا','وَأَصْبَحَ','الْمُلْكُ','لِلَّهِ'],hint:'أول ذكر الصباح (4 كلمات)'},
         {words:['حَسْبِيَ','اللَّهُ','لَا','إِلَهَ','إِلَّا','هُوَ'],hint:'حسبي الله (6 كلمات)'},
-        {words:['رَضِيتُ','بِاللَّهِ','رَبًّا','وَبِالإِسْلامِ','دِينًا'],hint:'دعاء الرضا (5 كلمات)'}
+        {words:['رَضِيتُ','بِاللَّهِ','رَبًّا','وَبِالإِسْلامِ','دِينًا'],hint:'دعاء الرضا (5 كلمات)'},
+        {words:['اللَّهُمَّ','إِنِّي','أَسْأَلُكَ','عِلْمًا','نَافِعًا'],hint:'دعاء العلم (5 كلمات)'},
+        {words:['أَعُوذُ','بِكَلِمَاتِ','اللَّهِ','التَّامَّاتِ','مِنْ','شَرِّ','مَا','خَلَقَ'],hint:'الكلمات التامات (8 كلمات)'}
       ],
       fb:[
         {before:'سُبْحَانَ اللَّهِ',blank:'وَبِحَمْدِهِ',after:'',opts:['وَبِحَمْدِهِ','وَبِنِعْمَتِهِ','وَبِرَحْمَتِهِ']},
-        {before:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ',blank:'لِلَّهِ',after:'',opts:['لِلَّهِ','لِعِبَادِهِ','لِلنَّاسِ']},
+        {before:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ',blank:'لِلَّهِ',after:'وَالْحَمْدُ لِلَّهِ',opts:['لِلَّهِ','لِعِبَادِهِ','لِلنَّاسِ']},
         {before:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ',blank:'تَوَكَّلْتُ',after:'',opts:['تَوَكَّلْتُ','آمَنْتُ','رَضِيتُ']},
-        {before:'رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلامِ',blank:'دِينًا',after:'',opts:['دِينًا','حُكْمًا','شَرِيعَةً']},
-        {before:'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا',blank:'طَيِّبًا',after:'وَعَمَلًا مُتَقَبَّلًا',opts:['طَيِّبًا','كَثِيرًا','وَاسِعًا']}
+        {before:'رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلامِ',blank:'دِينًا',after:'وَبِمُحَمَّدٍ نَبِيًّا',opts:['دِينًا','حُكْمًا','شَرِيعَةً']},
+        {before:'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا',blank:'طَيِّبًا',after:'وَعَمَلًا مُتَقَبَّلًا',opts:['طَيِّبًا','كَثِيرًا','وَاسِعًا']},
+        {before:'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا',blank:'عَبْدُكَ',after:'',opts:['عَبْدُكَ','خَلْقُكَ','أَمَتُكَ']},
+        {before:'أَعُوذُ بِكَلِمَاتِ اللَّهِ',blank:'التَّامَّاتِ',after:'مِنْ شَرِّ مَا خَلَقَ',opts:['التَّامَّاتِ','الْكَامِلَاتِ','الْعَظِيمَاتِ']},
+        {before:'اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ',blank:'أَمْسَيْنَا',after:'وَبِكَ نَحْيَا وَبِكَ نَمُوتُ',opts:['أَمْسَيْنَا','نَحْيَا','نَمُوتُ']},
+        {before:'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ',blank:'السَّمِيعُ',after:'الْعَلِيمُ',opts:['السَّمِيعُ','الْعَلِيمُ','الْقَدِيرُ']},
+        {before:'اللَّهُمَّ عَافِنِي فِي بَدَنِي اللَّهُمَّ عَافِنِي فِي سَمْعِي اللَّهُمَّ عَافِنِي فِي',blank:'بَصَرِي',after:'لَا إِلَهَ إِلَّا أَنْتَ',opts:['بَصَرِي','عَقْلِي','قَلْبِي']}
       ]
     }
   },
@@ -641,23 +668,42 @@ const ADHKAR={
     games:{
       vc:[{title:'التسبيح',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',count:100},{title:'لا إله إلا الله',text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',count:100},{title:'الاستغفار',text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',count:100},{title:'الصلاة على النبي',text:'اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى مُحَمَّدٍ',count:10}],
       tf:[
-        {dhikr:'',stmt:'من قرأ آية الكرسي مساءً حفظه الله حتى يصبح',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'},
-        {dhikr:'',stmt:'خواتيم البقرة تُقرأ في المساء لأنها تكفي قارئها',ans:true,xp:'✅ صحيح! من قرأ آيتين من آخر البقرة كفتاه'},
-        {dhikr:'',stmt:'ذكر المساء يبدأ بـ «أمسينا وأمسى الملك لله»',ans:true,xp:'✅ صحيح! من أذكار المساء المأثورة'},
-        {dhikr:'',stmt:'حسبي الله تُقال ثلاث مرات في المساء',ans:false,xp:'❌ خطأ! تُقال سبع مرات'},
-        {dhikr:'',stmt:'سيد الاستغفار أفضل أنواع الاستغفار',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'}
+        {dhikr:'',stmt:'آية الكرسي في المساء تحمي قارئها من الجن حتى يصبح',ans:true,xp:'✅ صحيح! رواه البخاري — حماية ليلية كاملة'},
+        {dhikr:'',stmt:'خواتيم البقرة هي آخر آيتين فقط في السورة',ans:true,xp:'✅ صحيح! الآيتان 285 و286 — كافيتان لمن قرأهما'},
+        {dhikr:'',stmt:'ذكر المساء يبدأ بـ «أمسينا وأمسى الملك لله»',ans:true,xp:'✅ صحيح! كما يبدأ ذكر الصباح بـ «أصبحنا وأصبح الملك لله»'},
+        {dhikr:'',stmt:'حسبي الله تُقال ثلاث مرات في المساء',ans:false,xp:'❌ خطأ! تُقال سبع مرات — من قالها سبعاً كفاه الله ما أهمه'},
+        {dhikr:'',stmt:'سيد الاستغفار من قاله موقناً ومات من ليلته دخل الجنة',ans:true,xp:'✅ صحيح! رواه البخاري'},
+        {dhikr:'',stmt:'الإشهاد بالتوحيد مساءً يبدأ بـ «اللهم إني أمسيت»',ans:true,xp:'✅ صحيح! بينما صباحاً يبدأ بـ «اللهم إني أصبحت»'},
+        {dhikr:'',stmt:'الرضا بالله يُقال مرة واحدة فقط في المساء',ans:false,xp:'❌ خطأ! يُقال ثلاث مرات'},
+        {dhikr:'',stmt:'التسبيح الكبير «سبحان الله وبحمده عدد خلقه» يحتوي على أربعة أوصاف',ans:true,xp:'✅ صحيح! عدد خلقه، رضا نفسه، زنة عرشه، مداد كلماته'},
+        {dhikr:'',stmt:'دعاء العافية «اللهم عافني في بدني» يُقال مرة واحدة',ans:false,xp:'❌ خطأ! يُقال ثلاث مرات'},
+        {dhikr:'',stmt:'من قال شكر النعمة حين يمسي أدّى شكر يومه كله',ans:true,xp:'✅ صحيح! قاله النبي ﷺ — فضل عظيم لكلمات قليلة'},
+        {dhikr:'',stmt:'«يا حي يا قيوم» اسمان من أسماء الله الحسنى',ans:true,xp:'✅ صحيح! الحي والقيوم من أسمائه تعالى'},
+        {dhikr:'',stmt:'بسم الله الحافظ تُقال ثلاث مرات مساءً كما تُقال صباحاً',ans:true,xp:'✅ صحيح! ثلاثاً صباحاً وثلاثاً مساءً'},
+        {dhikr:'',stmt:'الاستغفار يُقال مئة مرة في ختام أذكار المساء',ans:true,xp:'✅ صحيح! وكذلك التسبيح ولا إله إلا الله'},
+        {dhikr:'',stmt:'دعاء «اللهم اسْتُر عوراتي وآمِن روعاتي» يطلب الحفظ من ستة جهات',ans:true,xp:'✅ صحيح! أمام وخلف ويمين وشمال وفوق وتحت'},
+        {dhikr:'',stmt:'التعوذ من الشرك يُقال ثلاث مرات مساءً',ans:true,xp:'✅ صحيح! استعاذة من الشرك الخفي والجلي'}
       ],
       wo:[
-        {words:['أَمْسَيْنَا','وَأَمْسَى','الْمُلْكُ','لِلَّهِ'],hint:'ذكر المساء (4 كلمات)'},
-        {words:['سُبْحَانَ','اللَّهِ','وَبِحَمْدِهِ'],hint:'التسبيح (3 كلمات)'},
+        {words:['أَمْسَيْنَا','وَأَمْسَى','الْمُلْكُ','لِلَّهِ'],hint:'أول ذكر المساء (4 كلمات)'},
+        {words:['سُبْحَانَ','اللَّهِ','وَبِحَمْدِهِ','عَدَدَ','خَلْقِهِ'],hint:'التسبيح الكبير — أول شطر (5 كلمات)'},
         {words:['رَضِيتُ','بِاللَّهِ','رَبًّا','وَبِالإِسْلامِ','دِينًا'],hint:'دعاء الرضا (5 كلمات)'},
-        {words:['حَسْبِيَ','اللَّهُ','لَا','إِلَهَ','إِلَّا','هُوَ'],hint:'حسبي الله (6 كلمات)'}
+        {words:['حَسْبِيَ','اللَّهُ','لَا','إِلَهَ','إِلَّا','هُوَ'],hint:'حسبي الله (6 كلمات)'},
+        {words:['اللَّهُمَّ','عَافِنِي','فِي','بَدَنِي'],hint:'دعاء العافية (4 كلمات)'},
+        {words:['يَا','حَيُّ','يَا','قَيُّومُ','بِرَحْمَتِكَ','أَسْتَغِيثُ'],hint:'دعاء يا حي يا قيوم (6 كلمات)'},
+        {words:['أَعُوذُ','بِكَلِمَاتِ','اللَّهِ','التَّامَّاتِ','مِنْ','شَرِّ','مَا','خَلَقَ'],hint:'الكلمات التامات (8 كلمات)'}
       ],
       fb:[
-        {before:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ',blank:'لِلَّهِ',after:'',opts:['لِلَّهِ','لِعِبَادِهِ','لِلنَّاسِ']},
-        {before:'سُبْحَانَ اللَّهِ',blank:'وَبِحَمْدِهِ',after:'',opts:['وَبِحَمْدِهِ','وَبِنِعْمَتِهِ','وَبِرَحْمَتِهِ']},
-        {before:'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي',blank:'سَمْعِي',after:'',opts:['سَمْعِي','قَلْبِي','يَدَيَّ']},
-        {before:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ',blank:'مَا خَلَقَ',after:'',opts:['مَا خَلَقَ','كُلِّ شَيْءٍ','الشَّيْطَانِ']}
+        {before:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ',blank:'لِلَّهِ',after:'وَالْحَمْدُ لِلَّهِ',opts:['لِلَّهِ','لِعِبَادِهِ','لِلنَّاسِ']},
+        {before:'سُبْحَانَ اللَّهِ',blank:'وَبِحَمْدِهِ',after:'عَدَدَ خَلْقِهِ',opts:['وَبِحَمْدِهِ','وَبِنِعْمَتِهِ','وَبِرَحْمَتِهِ']},
+        {before:'اللَّهُمَّ عَافِنِي فِي بَدَنِي اللَّهُمَّ عَافِنِي فِي',blank:'سَمْعِي',after:'اللَّهُمَّ عَافِنِي فِي بَصَرِي',opts:['سَمْعِي','قَلْبِي','يَدَيَّ']},
+        {before:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ',blank:'مَا خَلَقَ',after:'',opts:['مَا خَلَقَ','كُلِّ شَيْءٍ','الشَّيْطَانِ']},
+        {before:'اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ',blank:'الْمَصِيرُ',after:'',opts:['الْمَصِيرُ','النُّشُورُ','الرُّجُوعُ']},
+        {before:'رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلامِ دِينًا وَبِمُحَمَّدٍ',blank:'نَبِيًّا',after:'',opts:['نَبِيًّا','رَسُولًا','قُدْوَةً']},
+        {before:'اللَّهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ فَلَكَ الْحَمْدُ وَلَكَ',blank:'الشُّكْرُ',after:'',opts:['الشُّكْرُ','الثَّنَاءُ','الْمَجْدُ']},
+        {before:'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا',blank:'تَكِلْنِي',after:'إِلَى نَفْسِي',opts:['تَكِلْنِي','تَتْرُكْنِي','تَنْسَانِي']},
+        {before:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ',blank:'الْعَظِيمِ',after:'',opts:['الْعَظِيمِ','الْكَرِيمِ','الرَّحِيمِ']},
+        {before:'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ',blank:'وَالْفَقْرِ',after:'وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ',opts:['وَالْفَقْرِ','وَالْمَرَضِ','وَالذُّلِّ']}
       ]
     }
   },
@@ -679,23 +725,41 @@ const ADHKAR={
     games:{
       vc:[{title:'اللهم قني',text:'اللَّهُمَّ قِنِي عَذَابَكَ',count:3},{title:'سبحان الله',text:'سُبْحَانَ اللَّهِ',count:33},{title:'الحمد لله',text:'الْحَمْدُ لِلَّهِ',count:33},{title:'الله أكبر',text:'اللَّهُ أَكْبَرُ',count:34}],
       tf:[
-        {dhikr:'',stmt:'آية الكرسي قبل النوم تحفظك من الشيطان طوال الليل',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'},
-        {dhikr:'',stmt:'تسبيح فاطمة: سبحان الله 33 والحمد لله 33 والله أكبر 34',ans:true,xp:'✅ صحيح! علّمه النبي ﷺ لفاطمة رضي الله عنها'},
-        {dhikr:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',stmt:'هذا الدعاء يُقال عند الاستيقاظ من النوم',ans:false,xp:'❌ خطأ! يُقال عند النوم، وعند الاستيقاظ: الحمد لله الذي أحيانا'},
-        {dhikr:'',stmt:'خواتيم البقرة تُقرأ قبل النوم وتكفي قارئها',ans:true,xp:'✅ صحيح! من قرأ آيتين من آخر البقرة كفتاه'},
-        {dhikr:'',stmt:'علّم النبي ﷺ تسبيح فاطمة لابنته فاطمة رضي الله عنها',ans:true,xp:'✅ صحيح! علّمها إياه بدلاً من خادمة طلبتها'}
+        {dhikr:'',stmt:'آية الكرسي قبل النوم تمنع الشيطان من الاقتراب حتى الصباح',ans:true,xp:'✅ صحيح! رواه البخاري — قاله النبي ﷺ'},
+        {dhikr:'',stmt:'تسبيح فاطمة يُقال قبل النوم: سبحان الله 33 والحمد لله 33 والله أكبر 34',ans:true,xp:'✅ صحيح! مجموعها 100 — علّمه النبي ﷺ لفاطمة'},
+        {dhikr:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',stmt:'هذا الدعاء يُقال عند الاستيقاظ من النوم',ans:false,xp:'❌ خطأ! يُقال عند النوم — وعند الاستيقاظ: «الحمد لله الذي أحيانا»'},
+        {dhikr:'',stmt:'خواتيم البقرة (آيتان 285-286) تكفي قارئها في ليلته',ans:true,xp:'✅ صحيح! قاله النبي ﷺ رواه البخاري ومسلم'},
+        {dhikr:'',stmt:'النبي ﷺ علّم فاطمة تسبيحه لأنها طلبت منه خادمة فأعطاها خيراً منها',ans:true,xp:'✅ صحيح! قصة رائعة في السيرة — التسبيح خير من الخادمة'},
+        {dhikr:'',stmt:'دعاء «اللهم قني عذابك» يُقال ثلاث مرات',ans:true,xp:'✅ صحيح! من قالها ثلاثاً صرف الله عنه عذاب القيامة'},
+        {dhikr:'',stmt:'دعاء الفراش «باسمك ربي وضعت جنبي» يُقال قبل وضع الرأس على الوسادة',ans:false,xp:'❌ خطأ! يُقال عند وضع الجنب — أي الاستلقاء على الجانب'},
+        {dhikr:'',stmt:'دعاء التسليم لله يذكر خمسة أفعال: أسلمت، فوّضت، وجّهت، ألجأت، آمنت',ans:true,xp:'✅ صحيح! خمسة أفعال تعبر عن التوكل الكامل على الله'},
+        {dhikr:'',stmt:'المعوذتان مع النفث تُقرأ ثلاث مرات ثم يُمسح الجسد',ans:true,xp:'✅ صحيح! سنة نبوية — يبدأ بالرأس والوجه ثم بقية الجسد'},
+        {dhikr:'',stmt:'تسبيح فاطمة مجموعه مئة تسبيحة',ans:true,xp:'✅ صحيح! 33 + 33 + 34 = 100'},
+        {dhikr:'',stmt:'دعاء «الحمد لله الذي أطعمنا وسقانا» يذكر أربع نعم',ans:true,xp:'✅ صحيح! الطعام والشراب والكفاية والإيواء'},
+        {dhikr:'',stmt:'دعاء الفراش يطلب الرحمة إن قُبضت الروح',ans:true,xp:'✅ صحيح! «فإن أمسكتَ نفسي فارحمها» — جمال التوكل على الله'},
+        {dhikr:'',stmt:'آية الكرسي في أذكار النوم تُقرأ ثلاث مرات',ans:false,xp:'❌ خطأ! تُقرأ مرة واحدة فقط قبل النوم'},
+        {dhikr:'',stmt:'دعاء الغيب والشهادة يتضمن الاستعاذة من شر الشيطان وشِرْكه',ans:true,xp:'✅ صحيح! «وأعوذ بك من شر الشيطان وشِرْكه»'},
+        {dhikr:'',stmt:'«باسمك اللهم أموت وأحيا» يُقال مرة واحدة',ans:true,xp:'✅ صحيح! مرة واحدة عند النوم كما في حديث حذيفة رضي الله عنه'}
       ],
       wo:[
-        {words:['بِاسْمِكَ','اللَّهُمَّ','أَمُوتُ','وَأَحْيَا'],hint:'دعاء النوم (4 كلمات)'},
+        {words:['بِاسْمِكَ','اللَّهُمَّ','أَمُوتُ','وَأَحْيَا'],hint:'دعاء النوم القصير (4 كلمات)'},
         {words:['اللَّهُمَّ','قِنِي','عَذَابَكَ','يَوْمَ','تَبْعَثُ','عِبَادَكَ'],hint:'دعاء الحماية (6 كلمات)'},
-        {words:['الْحَمْدُ','لِلَّهِ','الَّذِي','أَطْعَمَنَا','وَسَقَانَا'],hint:'دعاء الشكر (5 كلمات)'},
-        {words:['بِاسْمِكَ','رَبِّي','وَضَعْتُ','جَنْبِي'],hint:'دعاء الفراش (4 كلمات)'}
+        {words:['الْحَمْدُ','لِلَّهِ','الَّذِي','أَطْعَمَنَا','وَسَقَانَا'],hint:'دعاء شكر النعمة (5 كلمات)'},
+        {words:['بِاسْمِكَ','رَبِّي','وَضَعْتُ','جَنْبِي','وَبِكَ','أَرْفَعُهُ'],hint:'دعاء الفراش (6 كلمات)'},
+        {words:['اللَّهُمَّ','أَسْلَمْتُ','نَفْسِي','إِلَيْكَ'],hint:'دعاء التسليم (4 كلمات أولى)'},
+        {words:['سُبْحَانَ','اللَّهِ','وَالْحَمْدُ','لِلَّهِ','وَاللَّهُ','أَكْبَرُ'],hint:'تسبيح فاطمة — الصيغة المختصرة (6 كلمات)'}
       ],
       fb:[
         {before:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ',blank:'وَأَحْيَا',after:'',opts:['وَأَحْيَا','وَأَنَامُ','وَأَقُومُ']},
         {before:'اللَّهُمَّ',blank:'قِنِي',after:'عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ',opts:['قِنِي','أَعِنِّي','ارْزُقْنِي']},
         {before:'بِاسْمِكَ رَبِّي وَضَعْتُ',blank:'جَنْبِي',after:'وَبِكَ أَرْفَعُهُ',opts:['جَنْبِي','يَدَيَّ','رَأْسِي']},
-        {before:'اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ وَفَوَّضْتُ',blank:'أَمْرِي',after:'إِلَيْكَ',opts:['أَمْرِي','دِينِي','قَلْبِي']}
+        {before:'اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ وَفَوَّضْتُ',blank:'أَمْرِي',after:'إِلَيْكَ',opts:['أَمْرِي','دِينِي','قَلْبِي']},
+        {before:'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَكَفَانَا',blank:'وَآوَانَا',after:'',opts:['وَآوَانَا','وَرَزَقَنَا','وَنَصَرَنَا']},
+        {before:'اللَّهُمَّ إِنَّكَ خَلَقْتَ نَفْسِي وَأَنْتَ',blank:'تَوَفَّاهَا',after:'لَكَ مَمَاتُهَا وَمَحْيَاهَا',opts:['تَوَفَّاهَا','تَرْزُقُهَا','تَحْفَظُهَا']},
+        {before:'اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ وَوَجَّهْتُ',blank:'وَجْهِي',after:'إِلَيْكَ',opts:['وَجْهِي','قَلْبِي','أَمْرِي']},
+        {before:'آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ وَبِنَبِيِّكَ الَّذِي',blank:'أَرْسَلْتَ',after:'',opts:['أَرْسَلْتَ','اخْتَرْتَ','اصْطَفَيْتَ']},
+        {before:'رَغْبَةً وَرَهْبَةً',blank:'إِلَيْكَ',after:'لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ',opts:['إِلَيْكَ','إِلَى اللَّهِ','إِلَى رَبِّي']},
+        {before:'اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ',blank:'تَبْعَثُ',after:'عِبَادَكَ',opts:['تَبْعَثُ','تُحَاسِبُ','تَجْزِي']}
       ]
     }
   }
@@ -982,66 +1046,144 @@ function revealText(){
 }
 
 /* =========================================
-   MISHARY RASHID — شريط الصوت الكامل
+   RECITERS — اختيار القارئ
 ========================================= */
-// روابط مباشرة من islamhouse.com
-const MISHARY_URLS={
-  sabah: 'https://d1.islamhouse.com/data/ar/ih_sounds/chain_01/Mishari_Raashid/Azkar_AlSba7_w_AlMsa/ar_1434_Azkar_AlSba7.mp3',
-  masaa: 'https://d1.islamhouse.com/data/ar/ih_sounds/chain_01/Mishari_Raashid/Azkar_AlSba7_w_AlMsa/ar_1434_Azkar_AlMsa.mp3',
-  nawm:  'https://d1.islamhouse.com/data/ar/ih_sounds/chain/ar_Mashari_Athkar/ar_Mashari_Azkar06.mp3'
+const RECITERS={
+  mishary:{
+    name:'مشاري راشد العفاسي',
+    server:'https://server8.mp3quran.net/afs/',          // سور كاملة
+    ayah:'https://everyayah.com/data/Alafasy_128kbps/', // آيات منفردة
+    full:{
+      sabah:'https://d1.islamhouse.com/data/ar/ih_sounds/chain_01/Mishari_Raashid/Azkar_AlSba7_w_AlMsa/ar_1434_Azkar_AlSba7.mp3',
+      masaa:'https://d1.islamhouse.com/data/ar/ih_sounds/chain_01/Mishari_Raashid/Azkar_AlSba7_w_AlMsa/ar_1434_Azkar_AlMsa.mp3',
+      nawm :'https://d1.islamhouse.com/data/ar/ih_sounds/chain/ar_Mashari_Athkar/ar_Mashari_Azkar06.mp3'
+    }
+  },
+  ajami:{
+    name:'أحمد بن علي العجمي',
+    server:'https://server10.mp3quran.net/ajm/',
+    ayah:'https://everyayah.com/data/ahmed_ibn_ali_al_ajamy_128kbps/',
+    full:null
+  },
+  sudais:{
+    name:'عبدالرحمن السديس',
+    server:'https://server11.mp3quran.net/sds/',
+    ayah:'https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/',
+    full:null
+  },
+  maher:{
+    name:'ماهر المعيقلي',
+    server:'https://server12.mp3quran.net/maher/',
+    ayah:'https://everyayah.com/data/Maher_AlMuaiqly_128kbps/',
+    full:null
+  }
 };
+
+// خريطة الأذكار القرآنية → ملفات الصوت
+// آية الكرسي = البقرة 255 (رقم عالمي 262 في everyayah = 002255)
+// خواتيم البقرة = 285,286 = 002285 + 002286
+// الإخلاص=112، الفلق=113، الناس=114
+function getAudioUrls(title, reciter){
+  const r=RECITERS[reciter];
+  const srv=r.server;
+  const ay=r.ayah;
+  const map={
+    'آية الكرسي':         [ay+'002255.mp3'],
+    'خواتيم البقرة':       [ay+'002285.mp3', ay+'002286.mp3'],
+    'سورة الإخلاص':       [srv+'112.mp3'],
+    'سورة الفلق':         [srv+'113.mp3'],
+    'سورة الناس':         [srv+'114.mp3'],
+    'المعوذتان مع النفث': [srv+'112.mp3',srv+'113.mp3',srv+'114.mp3']
+  };
+  return map[title]||null;
+}
+
+let activeReciter='mishary';
+
+function selectReciter(id){
+  if(activeReciter===id)return;
+  misharyStop();
+  activeReciter=id;
+  document.querySelectorAll('.rc-btn').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+  document.getElementById('reciterName').textContent=RECITERS[id].name;
+  misharyInit(activeTab);
+}
+
 const MISHARY_LABELS={sabah:'أذكار الصباح',masaa:'أذكار المساء',nawm:'أذكار النوم'};
 
 let mAudio=null;
+let mQueue=[];
+let mQIdx=0;
 let mPlaying=false;
-let mRaf=null;
 
 function misharyInit(tab){
-  // stop current if tab changed
-  if(mAudio&&mAudio.dataset.tab!==tab){misharyStop();}
-  if(!mAudio){
-    mAudio=new Audio();
-    mAudio.dataset.tab=tab;
-    mAudio.src=MISHARY_URLS[tab];
-    mAudio.preload='metadata';
-    mAudio.ontimeupdate=misharyUpdateProgress;
-    mAudio.onloadedmetadata=misharyUpdateProgress;
-    mAudio.onended=()=>{mPlaying=false;document.getElementById('mPlay').textContent='▶';document.getElementById('mPlay').classList.remove('active');cancelAnimationFrame(mRaf);};
-    mAudio.onerror=()=>{misharyStop();};
-  }
+  if(mAudio&&(mAudio._tab!==tab||mAudio._rec!==activeReciter)){misharyStop();}
   document.getElementById('misharyLabel').textContent=MISHARY_LABELS[tab];
+  document.getElementById('reciterName').textContent=RECITERS[activeReciter].name;
+}
+
+// بناء قائمة تشغيل من أذكار التبويب (آيات قرآنية فقط إن لم يكن مشاري)
+function buildQueue(tab){
+  const r=RECITERS[activeReciter];
+  // مشاري: التسجيل الكامل من islamhouse
+  if(r.full&&r.full[tab]) return [r.full[tab]];
+  // باقي القراء: الآيات القرآنية فقط من السجل الحالي
+  const urls=[];
+  ADHKAR[tab].items.forEach(item=>{
+    const u=getAudioUrls(item.title,activeReciter);
+    if(u) urls.push(...u);
+  });
+  return urls;
 }
 
 function misharyToggle(){
-  const tab=activeTab;
-  misharyInit(tab);
   if(mPlaying){
-    mAudio.pause();mPlaying=false;
+    if(mAudio)mAudio.pause();
+    mPlaying=false;
     document.getElementById('mPlay').textContent='▶';
     document.getElementById('mPlay').classList.remove('active');
-  } else {
-    mAudio.play().then(()=>{
-      mPlaying=true;
-      document.getElementById('mPlay').textContent='⏸';
-      document.getElementById('mPlay').classList.add('active');
-    }).catch(()=>{});
+    return;
   }
+  // إعادة تشغيل من حيث توقف
+  if(mAudio&&mAudio.paused&&mAudio.currentTime>0){
+    mAudio.play().then(()=>{mPlaying=true;document.getElementById('mPlay').textContent='⏸';document.getElementById('mPlay').classList.add('active');}).catch(()=>{});
+    return;
+  }
+  // بداية جديدة
+  mQueue=buildQueue(activeTab);
+  mQIdx=0;
+  if(!mQueue.length)return;
+  playNext();
+}
+
+function playNext(){
+  if(mQIdx>=mQueue.length){misharyStop();return;}
+  mAudio=new Audio(mQueue[mQIdx]);
+  mAudio._tab=activeTab;mAudio._rec=activeReciter;
+  mAudio.ontimeupdate=misharyUpdateProgress;
+  mAudio.onloadedmetadata=misharyUpdateProgress;
+  mAudio.onended=()=>{mQIdx++;playNext();};
+  mAudio.onerror=()=>{mQIdx++;playNext();};
+  mAudio.play().then(()=>{
+    mPlaying=true;
+    document.getElementById('mPlay').textContent='⏸';
+    document.getElementById('mPlay').classList.add('active');
+  }).catch(()=>{mQIdx++;playNext();});
 }
 
 function misharyStop(){
-  if(mAudio){mAudio.pause();mAudio.currentTime=0;mAudio=null;}
-  mPlaying=false;
-  const pb=document.getElementById('mPlay');
-  if(pb){pb.textContent='▶';pb.classList.remove('active');}
-  document.getElementById('misharyFill').style.width='0%';
-  document.getElementById('mCurT').textContent='0:00';
-  document.getElementById('mDurT').textContent='--:--';
+  if(mAudio){mAudio.pause();mAudio.src='';mAudio=null;}
+  mQueue=[];mQIdx=0;mPlaying=false;
+  const b=document.getElementById('mPlay');
+  if(b){b.textContent='▶';b.classList.remove('active');}
+  const f=document.getElementById('misharyFill');if(f)f.style.width='0%';
+  const c=document.getElementById('mCurT');if(c)c.textContent='0:00';
+  const d=document.getElementById('mDurT');if(d)d.textContent='--:--';
 }
 
 function misharyUpdateProgress(){
   if(!mAudio)return;
-  const cur=mAudio.currentTime||0;
-  const dur=mAudio.duration||0;
+  const cur=mAudio.currentTime||0,dur=mAudio.duration||0;
   const pct=dur>0?(cur/dur*100):0;
   document.getElementById('misharyFill').style.width=pct+'%';
   document.getElementById('mCurT').textContent=fmtTime(cur);
@@ -1050,21 +1192,13 @@ function misharyUpdateProgress(){
 
 function misharySeek(e){
   if(!mAudio||!mAudio.duration)return;
-  const bar=e.currentTarget;
-  const ratio=e.offsetX/bar.offsetWidth;
-  mAudio.currentTime=ratio*mAudio.duration;
+  mAudio.currentTime=(e.offsetX/e.currentTarget.offsetWidth)*mAudio.duration;
 }
 
-function fmtTime(s){
-  const m=Math.floor(s/60);
-  const sec=Math.floor(s%60);
-  return m+':'+(sec<10?'0':'')+sec;
-}
+function fmtTime(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
 
-// update label when tab switches
 function updateMisharyBar(tab){
   misharyInit(tab);
-  document.getElementById('misharyLabel').textContent=MISHARY_LABELS[tab];
 }
 
 /* =========================================
@@ -1179,7 +1313,7 @@ function updateVcRing(){
 ========================================= */
 function tfInit(){
   const gd=ADHKAR[activeTab].games;
-  tfQs=[...gd.tf].sort(()=>Math.random()-.5).slice(0,5);
+  tfQs=[...gd.tf].sort(()=>Math.random()-.5);
   tfQI=0;tfSco=0;
   document.getElementById('tf-gr').classList.remove('on');
   tfRenderQ();
@@ -1188,7 +1322,7 @@ function tfInit(){
 function tfRenderQ(){
   const q=tfQs[tfQI];
   document.getElementById('tfQN').textContent=tfQI+1;
-  document.getElementById('tfQNum').textContent='السؤال '+(tfQI+1)+' من 5';
+  const tfTotal=tfQs.length;document.getElementById('tfQNum').textContent='السؤال '+(tfQI+1)+' من '+tfTotal;
   document.getElementById('tfSc').textContent=tfSco;
   document.getElementById('tfDhikr').textContent=q.dhikr||'';
   document.getElementById('tfStmt').textContent=q.stmt;
@@ -1217,20 +1351,20 @@ function tfAns(ans){
 
 function tfNext(){
   tfQI++;
-  if(tfQI>=5){tfShowResult();return;}
+  if(tfQI>=tfQs.length){tfShowResult();return;}
   document.getElementById('tfNxt').classList.remove('on');
   tfRenderQ();
 }
 
 function tfShowResult(){
-  const stars=tfSco>=5?'⭐⭐⭐':tfSco>=3?'⭐⭐':tfSco>=1?'⭐':'';
+  const tfT=tfQs.length;const stars=tfSco>=Math.ceil(tfT*.9)?'⭐⭐⭐':tfSco>=Math.ceil(tfT*.6)?'⭐⭐':tfSco>=Math.ceil(tfT*.3)?'⭐':'';
   const msgs=['استمر في التعلم! 💪','جيد جداً! 👍','ممتاز! 🌟','مثالي! ما شاء الله! 🎯'];
-  const mi=tfSco<=1?0:tfSco<=2?1:tfSco<=4?2:3;
-  document.getElementById('tfGrSc').textContent=tfSco+'/5';
+  const mi=tfSco<=Math.floor(tfQs.length*.2)?0:tfSco<=Math.floor(tfQs.length*.5)?1:tfSco<=Math.floor(tfQs.length*.8)?2:3;
+  document.getElementById('tfGrSc').textContent=tfSco+'/'+tfQs.length;
   document.getElementById('tfGrMsg').textContent=msgs[mi];
   document.getElementById('tfGrStars').textContent=stars;
   document.getElementById('tf-gr').classList.add('on');
-  if(tfSco>=3)confetti();
+  if(tfSco>=Math.ceil(tfQs.length*.6))confetti();
 }
 
 function tfRestart(){document.getElementById('tf-gr').classList.remove('on');tfInit();}
@@ -1331,7 +1465,7 @@ function woShowResult(){
   const stars=woSco>=4?'⭐⭐⭐':woSco>=3?'⭐⭐':woSco>=2?'⭐':'';
   const msgs=['استمر في المحاولة! 💪','جيد! 👍','ممتاز! 🌟','مثالي! ما شاء الله! 🎯'];
   const mi=woSco<=0?0:woSco<=1?1:woSco<=3?2:3;
-  document.getElementById('woGrSc').textContent=woSco+'/4';
+  document.getElementById('woGrSc').textContent=woSco+'/'+woQs.length;
   document.getElementById('woGrMsg').textContent=msgs[mi];
   document.getElementById('woGrStars').textContent=stars;
   document.getElementById('wo-gr').classList.add('on');
@@ -1403,7 +1537,7 @@ function fbShowResult(){
   const stars=fbSco>=4?'⭐⭐⭐':fbSco>=3?'⭐⭐':fbSco>=2?'⭐':'';
   const msgs=['تحتاج مزيداً من التعلم! 💪','جيد جداً! 👍','ممتاز! 🌟','مثالي! ما شاء الله! 🎯'];
   const mi=fbSco<=0?0:fbSco<=1?1:fbSco<=3?2:3;
-  document.getElementById('fbGrSc').textContent=fbSco+'/4';
+  document.getElementById('fbGrSc').textContent=fbSco+'/'+fbQs.length;
   document.getElementById('fbGrMsg').textContent=msgs[mi];
   document.getElementById('fbGrStars').textContent=stars;
   document.getElementById('fb-gr').classList.add('on');
