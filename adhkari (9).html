@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌿 أذكاري</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;user-select:none;-webkit-user-select:none;transition:background .45s,color .45s}
+
+/* ===== THEME VARS ===== */
+:root{
+  --bg:#f5f0e4;--card:#fffdf7;--accent:#c8922a;--accent2:#9a6814;
+  --glow:rgba(200,146,42,.22);--text:#2a1800;--mid:#6b4c1e;--muted:#9a7545;
+  --border:rgba(200,146,42,.2);--shadow:0 4px 24px rgba(120,70,0,.1);
+  --tbg:rgba(200,146,42,.09);--star:#f5c518;--grn:#2d7a4f;--red:#d94040;
+  --ring-c:220px;
+}
+
+/* ===== APP SHELL ===== */
+.app{max-width:480px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* decorative glow */
+.app::before{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);width:480px;height:220px;background:radial-gradient(ellipse 80% 100% at 50% 0%,var(--glow),transparent 75%);pointer-events:none;z-index:0;transition:background .45s}
+
+/* ===== HEADER ===== */
+.hdr{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 2px 14px var(--glow);flex-shrink:0;transition:background .45s,border-color .45s}
+.hdr-logo{display:flex;align-items:center;gap:7px}
+.hdr-logo .ico{font-size:1.6rem;animation:floaty 3.5s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hdr-logo h1{font-size:1.2rem;font-weight:900;color:var(--accent)}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.streak-pill{display:flex;align-items:center;gap:5px;background:var(--tbg);border:1px solid var(--border);border-radius:99px;padding:4px 12px}
+.streak-pill .fire{font-size:1rem}
+.streak-pill .sn{font-weight:800;font-size:.9rem;color:var(--accent)}
+.streak-pill .sl{font-size:.67rem;color:var(--muted)}
+
+/* ===== TABS ===== */
+.tabs{position:relative;z-index:10;display:flex;gap:3px;padding:8px 10px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;transition:background .45s}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:13px;border:1px solid transparent;background:transparent;cursor:pointer;transition:all .25s;font-family:'Cairo',sans-serif}
+.tab-btn .ti{font-size:1.25rem;transition:transform .25s}
+.tab-btn .tl{font-size:.7rem;font-weight:700;color:var(--muted)}
+.tab-btn.on{background:var(--accent);border-color:var(--accent2);box-shadow:0 3px 12px var(--glow)}
+.tab-btn.on .tl{color:#fff}
+.tab-btn.on .ti{transform:scale(1.18)}
+
+/* ===== SUB NAV ===== */
+.subnav{display:flex;gap:6px;padding:8px 12px 4px;flex-shrink:0;position:relative;z-index:5}
+.sub-btn{flex:1;padding:8px 4px;border-radius:12px;border:1.5px solid var(--border);background:transparent;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;color:var(--muted);transition:all .2s}
+.sub-btn.on{background:var(--tbg);color:var(--accent);border-color:var(--accent)}
+
+/* ===== SCROLL AREA ===== */
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px 24px;position:relative;z-index:5;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+
+/* Section visibility */
+.sec{display:none;flex-direction:column;gap:10px}
+.sec.on{display:flex}
+
+/* ===== STATS BAR ===== */
+.stats{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:15px;padding:10px 14px;border:1px solid var(--border);box-shadow:var(--shadow);transition:background .45s}
+.stars-r{display:flex;align-items:center;gap:4px}
+.si{font-size:1.15rem;color:#ccc;transition:all .3s}
+.si.on{color:var(--star);filter:drop-shadow(0 0 5px rgba(245,197,24,.7))}
+.st{font-size:.72rem;color:var(--muted)}
+
+/* ===== PROGRESS ===== */
+.prog{background:var(--card);border-radius:13px;padding:10px 14px;border:1px solid var(--border);box-shadow:var(--shadow);transition:background .45s}
+.prog-hdr{display:flex;justify-content:space-between;font-size:.73rem;color:var(--mid);margin-bottom:6px;font-weight:600}
+.prog-bar{height:10px;background:rgba(0,0,0,.07);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .6s cubic-bezier(.34,1.56,.64,1);position:relative}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.35) 70%,transparent);animation:shine 2.5s infinite}
+@keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+
+/* ===== DOTS ===== */
+.dots{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(0,0,0,.1);border:1.5px solid transparent;transition:all .3s;cursor:pointer}
+.dot.done{background:var(--grn)}
+.dot.cur{background:var(--accent);transform:scale(1.4);box-shadow:0 0 8px var(--glow)}
+
+/* ===== DHIKR CARD ===== */
+.dcard{background:var(--card);border-radius:22px;padding:20px 16px 18px;border:1.5px solid var(--border);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.7);display:flex;flex-direction:column;gap:11px;position:relative;overflow:hidden;transition:background .45s,border-color .45s}
+.dcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:22px 22px 0 0}
+.dc-top{display:flex;justify-content:space-between;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:3px;background:var(--tbg);color:var(--accent);border-radius:99px;padding:3px 10px;font-size:.7rem;font-weight:700;border:1px solid var(--border)}
+.dc-n{width:24px;height:24px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800}
+.dc-title{font-size:1rem;font-weight:800;color:var(--mid);text-align:center}
+/* mem */
+.mem-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.tog{width:42px;height:23px;background:#ccc;border-radius:99px;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+.tog.on{background:var(--accent)}
+.knob{position:absolute;width:17px;height:17px;background:#fff;border-radius:50%;top:3px;right:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tog.on .knob{transform:translateX(-19px)}
+.mem-lbl{font-size:.73rem;color:var(--mid);font-weight:600}
+/* text */
+.dtext{font-family:'Amiri',serif;font-size:1.42rem;line-height:2.1;text-align:center;color:var(--text);padding:10px 2px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);transition:filter .4s}
+.dtext.blur{filter:blur(8px);cursor:pointer}
+.dmean{font-size:.77rem;color:var(--muted);text-align:center;line-height:1.7;background:var(--tbg);border-radius:11px;padding:8px 12px}
+/* audio */
+/* counter */
+.ctr-sec{display:flex;flex-direction:column;align-items:center;gap:7px}
+.ctr-lbl{font-size:.73rem;color:var(--muted);font-weight:600;text-align:center}
+.tap-btn{width:88px;height:88px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;cursor:pointer;box-shadow:0 5px 18px var(--glow),0 2px 0 rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .1s,box-shadow .1s;position:relative;overflow:hidden;font-family:'Cairo',sans-serif}
+.tap-btn:active{transform:scale(.9) translateY(2px);box-shadow:0 2px 6px var(--glow)}
+.ctr-n{font-size:1.9rem;font-weight:900;transition:transform .12s,color .12s;display:block}
+.ctr-n.bump{transform:scale(1.4);color:var(--star)}
+.ctr-sub{font-size:.63rem}
+.ctr-tot{font-size:.75rem;color:var(--muted)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);animation:rpl .5s linear;pointer-events:none}
+@keyframes rpl{to{transform:scale(4);opacity:0}}
+/* mishary bar */
+.mishary-bar{background:var(--card);border-bottom:1px solid var(--border);padding:9px 14px 8px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;position:relative;z-index:8;transition:background .45s}
+.mishary-top{display:flex;align-items:center;justify-content:space-between}
+.mishary-info{display:flex;align-items:center;gap:9px}
+.mishary-ico{font-size:1.4rem;animation:floaty 3.5s ease-in-out infinite}
+.mishary-name{font-size:.82rem;font-weight:800;color:var(--accent)}
+.mishary-sub{font-size:.68rem;color:var(--muted);font-weight:600}
+.mishary-btns{display:flex;gap:7px}
+.m-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--tbg);color:var(--accent);font-size:1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-weight:900}
+.m-btn.active{background:var(--accent);color:#fff;border-color:var(--accent2);box-shadow:0 3px 10px var(--glow)}
+.m-stop{font-size:.85rem}
+.mishary-prog-wrap{display:flex;align-items:center;gap:8px}
+.m-time{font-size:.65rem;color:var(--muted);min-width:28px;font-weight:700;font-family:monospace}
+.mishary-prog{flex:1;height:6px;background:rgba(0,0,0,.08);border-radius:99px;overflow:hidden;cursor:pointer;position:relative}
+.mishary-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s linear;pointer-events:none}
+/* nav arrows */
+.nav-arrows{display:flex;align-items:center;justify-content:center;gap:14px;margin:2px 0}
+.nav-arr{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:var(--tbg);color:var(--accent);font-size:1.2rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;font-weight:900}
+.nav-arr:active{transform:scale(.9)}
+.nav-arr:disabled{opacity:.25;pointer-events:none}
+.nav-pos{font-size:.72rem;color:var(--muted);font-weight:700;min-width:44px;text-align:center}
+/* next */
+.nxt-btn{background:linear-gradient(135deg,var(--grn),#3aaa62);color:#fff;border:none;border-radius:99px;padding:12px 26px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(45,122,79,.3);align-self:center;opacity:0;pointer-events:none;transform:translateY(8px);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.nxt-btn.on{opacity:1;pointer-events:all;transform:translateY(0)}
+/* tasbih */
+.tb-wrap{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+.tb-i{background:var(--tbg);border:1px solid var(--border);border-radius:13px;padding:9px 12px;text-align:center;cursor:pointer;transition:all .2s;min-width:82px}
+.tb-i:active{transform:scale(.95)}
+.tb-i.done{background:rgba(45,122,79,.18);border-color:var(--grn)}
+.tb-name{font-size:.72rem;color:var(--mid);font-weight:600}
+.tb-n{font-size:1.4rem;font-weight:900;color:var(--accent);transition:transform .15s,color .15s}
+.tb-n.bump{transform:scale(1.3);color:var(--star)}
+.tb-goal{font-size:.66rem;color:var(--muted)}
+
+/* ===== DONE SCREEN ===== */
+.done-scr{display:none;flex-direction:column;align-items:center;text-align:center;gap:13px;padding:16px 8px}
+.done-scr.on{display:flex}
+.done-ico{font-size:4.2rem;animation:popIn .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.done-title{font-size:1.8rem;font-weight:900;color:var(--accent)}
+.done-msg{font-size:.86rem;color:var(--mid);line-height:1.8;max-width:280px}
+.done-stars{display:flex;gap:9px;font-size:2.4rem}
+.ds{animation:spop .4s cubic-bezier(.34,1.56,.64,1) backwards}
+.ds:nth-child(1){animation-delay:.1s}.ds:nth-child(2){animation-delay:.3s}.ds:nth-child(3){animation-delay:.5s}
+@keyframes spop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.done-stats{display:flex;gap:10px}
+.dstat{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:10px 16px;text-align:center;box-shadow:var(--shadow)}
+.dstat-v{font-size:1.5rem;font-weight:900;color:var(--accent)}
+.dstat-l{font-size:.66rem;color:var(--muted)}
+.rst-btn{background:transparent;border:1.5px solid var(--border);border-radius:99px;padding:9px 22px;font-family:'Cairo',sans-serif;font-size:.8rem;color:var(--mid);cursor:pointer;transition:all .2s}
+.rst-btn:hover{background:var(--tbg)}
+
+/* ===== GAMES HOME ===== */
+.g-home{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.g-card{background:var(--card);border-radius:18px;border:1.5px solid var(--border);box-shadow:var(--shadow);padding:18px 10px 14px;text-align:center;cursor:pointer;transition:all .22s;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;overflow:hidden}
+.g-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity .2s}
+.g-card:hover::before,.g-card:active::before{opacity:1}
+.g-card:active{transform:scale(.96)}
+.gc-ico{font-size:2.3rem}
+.gc-name{font-size:.82rem;font-weight:800;color:var(--mid)}
+.gc-desc{font-size:.68rem;color:var(--muted);line-height:1.5}
+
+/* ===== GAME SCREEN ===== */
+.gs{display:none;flex-direction:column;gap:11px}
+.gs.on{display:flex}
+.gs-hdr{display:flex;align-items:center;gap:10px}
+.back-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:all .2s;flex-shrink:0;color:var(--mid)}
+.back-btn:hover{background:var(--tbg)}
+.gs-title{font-size:.95rem;font-weight:800;color:var(--mid)}
+.score-bar{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:12px;padding:7px 13px;border:1px solid var(--border);font-size:.78rem;color:var(--muted)}
+.score-bar span{font-weight:800;color:var(--accent);font-size:.95rem}
+
+/* Game result */
+.gr{display:none;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:10px}
+.gr.on{display:flex}
+.gr-ico{font-size:3.8rem;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+.gr-score{font-size:2.5rem;font-weight:900;color:var(--accent)}
+.gr-msg{font-size:.88rem;color:var(--mid);line-height:1.8}
+.gr-stars{display:flex;gap:7px;font-size:2.1rem}
+.gr-btn{background:var(--accent);color:#fff;border:none;border-radius:99px;padding:11px 26px;font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px var(--glow)}
+
+/* ===== GAME 1: VISUAL COUNTER ===== */
+.vc-list{display:flex;flex-direction:column;gap:8px}
+.vc-item{background:var(--card);border-radius:13px;border:1.5px solid var(--border);padding:13px 15px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center}
+.vc-item:active{transform:scale(.98)}
+.vc-iname{font-size:.88rem;font-weight:700;color:var(--mid)}
+.vc-icnt{font-size:.73rem;color:var(--muted)}
+.vc-play{display:none;flex-direction:column;align-items:center;gap:13px}
+.vc-play.on{display:flex}
+.vc-ring-wrap{position:relative;width:164px;height:164px;display:flex;align-items:center;justify-content:center}
+.vc-ring{position:absolute;inset:0;transform:rotate(-90deg)}
+.vc-rbg{fill:none;stroke:rgba(0,0,0,.08);stroke-width:10}
+.vc-rfill{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;stroke-dasharray:450;stroke-dashoffset:450;transition:stroke-dashoffset .5s ease}
+.vc-emoji{font-size:4.2rem;z-index:1;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.vc-emoji.pop{transform:scale(1.45)}
+.vc-prog-txt{font-size:.8rem;color:var(--muted)}
+.vc-dtxt{font-family:'Amiri',serif;font-size:1.1rem;line-height:1.9;text-align:center;color:var(--text);background:var(--card);border-radius:13px;padding:10px 13px;border:1px solid var(--border);width:100%}
+.vc-tapbig{width:78px;height:78px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:1.7rem;cursor:pointer;box-shadow:0 4px 16px var(--glow),0 2px 0 rgba(0,0,0,.2);transition:transform .1s}
+.vc-tapbig:active{transform:scale(.88)}
+.vc-done-msg{display:none;text-align:center;flex-direction:column;align-items:center;gap:6px}
+.vc-done-msg.on{display:flex}
+
+/* ===== GAME 2: TRUE/FALSE ===== */
+.tf-box{background:var(--card);border-radius:18px;border:1.5px solid var(--border);padding:18px 15px;text-align:center;box-shadow:var(--shadow);transition:background .45s}
+.tf-qnum{font-size:.72rem;color:var(--muted);margin-bottom:7px}
+.tf-dhikr{font-family:'Amiri',serif;font-size:1.08rem;line-height:1.9;color:var(--text);margin:6px 0;min-height:24px}
+.tf-stmt{font-size:.9rem;font-weight:700;color:var(--mid);line-height:1.7}
+.tf-btns{display:flex;gap:9px}
+.tf-btn{flex:1;padding:13px;border-radius:13px;border:2px solid transparent;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .15s}
+.tf-t{background:rgba(45,122,79,.1);color:var(--grn);border-color:rgba(45,122,79,.25)}
+.tf-f{background:rgba(217,64,64,.1);color:var(--red);border-color:rgba(217,64,64,.25)}
+.tf-t.ans-c,.tf-t.ans-right{background:#2d7a4f;color:#fff;border-color:#2d7a4f}
+.tf-f.ans-c,.tf-f.ans-right{background:var(--red);color:#fff;border-color:var(--red)}
+.tf-t.ans-w{opacity:.4}
+.tf-f.ans-w{opacity:.4}
+.tf-fb{text-align:center;font-size:.82rem;font-weight:700;padding:8px;border-radius:10px;min-height:36px;display:none}
+.tf-fb.on{display:block}
+.tf-fb.ok{background:rgba(45,122,79,.12);color:var(--grn)}
+.tf-fb.no{background:rgba(217,64,64,.1);color:var(--red)}
+.tf-nxt{background:var(--accent);color:#fff;border:none;border-radius:99px;padding:10px 24px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;align-self:center;display:none}
+.tf-nxt.on{display:block}
+
+/* ===== GAME 3: WORD ORDER ===== */
+.wo-hint{font-size:.74rem;color:var(--muted);text-align:center;font-family:'Amiri',serif}
+.wo-ans{min-height:52px;background:var(--tbg);border-radius:13px;border:2px dashed var(--border);padding:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;transition:border-color .2s,background .2s}
+.wo-ans.ok{border-color:var(--grn);background:rgba(45,122,79,.08)}
+.wo-ans.no{border-color:var(--red);background:rgba(217,64,64,.06)}
+.wo-bank{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:44px}
+.wo-word{font-family:'Amiri',serif;font-size:1rem;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:6px 11px;cursor:pointer;transition:all .2s;color:var(--text)}
+.wo-word:active{transform:scale(.95)}
+.wo-word.picked{background:var(--accent);color:#fff;border-color:var(--accent2)}
+.wo-word.gone{opacity:.25;pointer-events:none}
+.wo-fb{text-align:center;font-size:.8rem;font-weight:700;min-height:20px}
+.wo-fb.ok{color:var(--grn)}.wo-fb.no{color:var(--red)}
+.wo-acts{display:flex;gap:8px;justify-content:center}
+.wo-check{padding:9px 20px;border-radius:99px;border:none;background:var(--accent);color:#fff;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer}
+.wo-clr{padding:9px 20px;border-radius:99px;border:1px solid var(--border);background:var(--tbg);color:var(--mid);font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer}
+
+/* ===== GAME 4: FILL BLANK ===== */
+.fb-line{font-family:'Amiri',serif;font-size:1.28rem;line-height:2;text-align:center;color:var(--text);background:var(--card);border-radius:13px;padding:14px;border:1px solid var(--border);word-break:break-word;transition:background .45s}
+.fb-blank{display:inline-block;min-width:70px;border-bottom:3px solid var(--accent);vertical-align:middle;margin:0 5px;transition:border-color .3s;text-align:center;font-size:1.1rem}
+.fb-blank.filled{border-color:var(--grn);color:var(--grn);font-weight:700}
+.fb-opts{display:flex;flex-direction:column;gap:7px}
+.fb-opt{font-family:'Amiri',serif;font-size:1.08rem;background:var(--card);border:1.5px solid var(--border);border-radius:13px;padding:11px 14px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text)}
+.fb-opt:active{transform:scale(.99)}
+.fb-opt.ok{background:rgba(45,122,79,.12);border-color:var(--grn);color:var(--grn)}
+.fb-opt.no{background:rgba(217,64,64,.07);border-color:var(--red);color:var(--red)}
+.fb-opt.off{pointer-events:none}
+.fb-fb{text-align:center;font-size:.8rem;font-weight:700;min-height:20px}
+.fb-fb.ok{color:var(--grn)}.fb-fb.no{color:var(--red)}
+.fb-nxt{background:var(--accent);color:#fff;border:none;border-radius:99px;padding:10px 24px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;align-self:center;display:none}
+.fb-nxt.on{display:block}
+
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:999}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="app">
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-logo">
+    <span class="ico" id="hdrIco">🌅</span>
+    <h1>أذكاري</h1>
+  </div>
+  <div class="hdr-right">
+    <div class="streak-pill">
+      <span class="fire">🔥</span>
+      <span class="sn" id="globalStreak">0</span>
+      <span class="sl">يوم</span>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn on" onclick="switchTab('sabah')" id="tb-sabah"><span class="ti">🌅</span><span class="tl">الصباح</span></button>
+  <button class="tab-btn" onclick="switchTab('masaa')" id="tb-masaa"><span class="ti">🌆</span><span class="tl">المساء</span></button>
+  <button class="tab-btn" onclick="switchTab('nawm')" id="tb-nawm"><span class="ti">🌙</span><span class="tl">النوم</span></button>
+</div>
+
+<!-- SUB NAV -->
+<div class="subnav">
+  <button class="sub-btn on" onclick="switchSub('adhkar')" id="sb-adhkar">🤲 الأذكار</button>
+  <button class="sub-btn" onclick="switchSub('games')" id="sb-games">🎮 الألعاب</button>
+</div>
+
+<!-- شريط مشاري راشد -->
+<div class="mishary-bar" id="misharyBar">
+  <div class="mishary-top">
+    <div class="mishary-info">
+      <span class="mishary-ico">🎙️</span>
+      <div>
+        <div class="mishary-name">مشاري راشد العفاسي</div>
+        <div class="mishary-sub" id="misharyLabel">أذكار الصباح</div>
+      </div>
+    </div>
+    <div class="mishary-btns">
+      <button class="m-btn" id="mPlay" onclick="misharyToggle()">▶</button>
+      <button class="m-btn m-stop" onclick="misharyStop()">■</button>
+    </div>
+  </div>
+  <div class="mishary-prog-wrap">
+    <span class="m-time" id="mCurT">0:00</span>
+    <div class="mishary-prog" onclick="misharySeek(event)">
+      <div class="mishary-fill" id="misharyFill"></div>
+    </div>
+    <span class="m-time" id="mDurT">--:--</span>
+  </div>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="scroll">
+
+  <!-- ===== ADHKAR SECTION ===== -->
+  <div class="sec on" id="adhkar-sec">
+
+    <div class="stats">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:1.35rem">🔥</span>
+        <div>
+          <div style="font-size:1.4rem;font-weight:900;color:var(--accent);line-height:1" id="strkN">0</div>
+          <div style="font-size:.66rem;color:var(--muted)">يوم متتالي</div>
+        </div>
+      </div>
+      <div class="stars-r">
+        <span class="si" id="si1">⭐</span>
+        <span class="si" id="si2">⭐</span>
+        <span class="si" id="si3">⭐</span>
+        <span class="st" id="stTotal">×0</span>
+      </div>
+    </div>
+
+    <div class="prog">
+      <div class="prog-hdr"><span>🌺 التقدم</span><span id="progTxt">0/8</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="dots" id="dotsEl"></div>
+
+    <!-- DHIKR CARD -->
+    <div class="dcard" id="dcard">
+      <div class="dc-top">
+        <div class="badge" id="dcBadge">📖 قرآن</div>
+        <div class="dc-n" id="dcN">1</div>
+      </div>
+      <div class="dc-title" id="dcTitle"></div>
+      <div class="mem-row">
+        <div class="tog" id="memTog" onclick="toggleMem()"><div class="knob"></div></div>
+        <span class="mem-lbl">وضع الحفظ</span>
+      </div>
+      <div class="dtext" id="dtext" onclick="revealText()"></div>
+      <div class="dmean" id="dmean"></div>
+      <!-- سهام التنقل -->
+      <div class="nav-arrows">
+        <button class="nav-arr" id="prevArr" onclick="navDhikr(-1)" title="السابق">&#8592;</button>
+        <span class="nav-pos" id="navPos"></span>
+        <button class="nav-arr" id="nextArr" onclick="navDhikr(1)" title="التالي">&#8594;</button>
+      </div>
+      <!-- Normal counter -->
+      <div class="ctr-sec" id="normCtr">
+        <div class="ctr-lbl" id="ctrLbl">اضغط للعد</div>
+        <button class="tap-btn" onclick="handleTap(event)">
+          <span class="ctr-n" id="ctrN">0</span>
+          <span class="ctr-sub">اضغط</span>
+        </button>
+        <div class="ctr-tot" id="ctrTot"></div>
+      </div>
+      <!-- Tasbih counter -->
+      <div id="tasbihCtr" style="display:none;flex-direction:column;align-items:center;gap:9px">
+        <div class="ctr-lbl">تسبيح فاطمة رضي الله عنها</div>
+        <div class="tb-wrap">
+          <div class="tb-i" id="tbi0" onclick="tapTasbih(0)"><div class="tb-name">سبحان الله</div><div class="tb-n" id="tbn0">0</div><div class="tb-goal">/33</div></div>
+          <div class="tb-i" id="tbi1" onclick="tapTasbih(1)"><div class="tb-name">الحمد لله</div><div class="tb-n" id="tbn1">0</div><div class="tb-goal">/33</div></div>
+          <div class="tb-i" id="tbi2" onclick="tapTasbih(2)"><div class="tb-name">الله أكبر</div><div class="tb-n" id="tbn2">0</div><div class="tb-goal">/34</div></div>
+        </div>
+      </div>
+      <button class="nxt-btn" id="nxtBtn" onclick="nextDhikr()">✅ التالي</button>
+    </div>
+
+    <!-- DONE -->
+    <div class="done-scr" id="doneScr">
+      <div class="done-ico" id="doneIco">🌟</div>
+      <div class="done-title">ما شاء الله!</div>
+      <div class="done-msg" id="doneMsg"></div>
+      <div class="done-stars"><span class="ds">⭐</span><span class="ds">⭐</span><span class="ds">⭐</span></div>
+      <div class="done-stats">
+        <div class="dstat"><div class="dstat-v" id="dStrkV">1</div><div class="dstat-l">يوم متتالي</div></div>
+        <div class="dstat"><div class="dstat-v" id="dStarsV">3</div><div class="dstat-l">نجومك</div></div>
+      </div>
+      <button class="rst-btn" onclick="resetAdhkar()">🔄 إعادة</button>
+    </div>
+
+  </div><!-- end adhkar-sec -->
+
+  <!-- ===== GAMES SECTION ===== -->
+  <div class="sec" id="games-sec">
+
+    <!-- Home -->
+    <div class="g-home" id="g-home">
+      <div class="g-card" onclick="openGame('vc')"><div class="gc-ico">🌳</div><div class="gc-name">العداد الرسومي</div><div class="gc-desc">سبّح وشاهد الحديقة تنمو!</div></div>
+      <div class="g-card" onclick="openGame('tf')"><div class="gc-ico">✅</div><div class="gc-name">صح وغلط</div><div class="gc-desc">هل تعرف معاني الأذكار؟</div></div>
+      <div class="g-card" onclick="openGame('wo')"><div class="gc-ico">🔀</div><div class="gc-name">رتّب الكلمات</div><div class="gc-desc">رتّب كلمات الذكر بالترتيب</div></div>
+      <div class="g-card" onclick="openGame('fb')"><div class="gc-ico">✍️</div><div class="gc-name">أكمل الذكر</div><div class="gc-desc">أكمل الكلمة الناقصة</div></div>
+    </div>
+
+    <!-- GAME: Visual Counter -->
+    <div class="gs" id="gs-vc">
+      <div class="gs-hdr">
+        <div class="back-btn" onclick="closeGame()">←</div>
+        <div class="gs-title">🌳 العداد الرسومي</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);text-align:center">اختر ذكراً وابدأ العد — الحديقة ستنمو!</div>
+      <!-- Picker -->
+      <div class="vc-list" id="vc-list"></div>
+      <!-- Play -->
+      <div class="vc-play" id="vc-play">
+        <div class="vc-ring-wrap">
+          <svg class="vc-ring" viewBox="0 0 164 164">
+            <circle class="vc-rbg" cx="82" cy="82" r="70"/>
+            <circle class="vc-rfill" id="vcRing" cx="82" cy="82" r="70"/>
+          </svg>
+          <div class="vc-emoji" id="vcEmoji">🌱</div>
+        </div>
+        <div class="vc-prog-txt" id="vcProg">0 / 100</div>
+        <div class="vc-dtxt" id="vcTxt"></div>
+        <button class="vc-tapbig" onclick="vcTap()">👆</button>
+        <div class="vc-done-msg" id="vcDoneMsg">
+          <div style="font-size:2.2rem">🌺🌸🌻🌼</div>
+          <div style="font-size:.9rem;color:var(--grn);font-weight:700">أحسنت! اكتملت حديقتك! 🎉</div>
+        </div>
+        <button class="rst-btn" onclick="vcReset()" style="align-self:center">🔄 ذكر آخر</button>
+      </div>
+    </div>
+
+    <!-- GAME: True/False -->
+    <div class="gs" id="gs-tf">
+      <div class="gs-hdr">
+        <div class="back-btn" onclick="closeGame()">←</div>
+        <div class="gs-title">✅ صح وغلط</div>
+      </div>
+      <div class="score-bar">
+        <span>السؤال <span id="tfQN">1</span>/5</span>
+        <span>✅ <span id="tfSc">0</span>/5</span>
+      </div>
+      <div class="tf-box">
+        <div class="tf-qnum" id="tfQNum">السؤال 1 من 5</div>
+        <div class="tf-dhikr" id="tfDhikr"></div>
+        <div class="tf-stmt" id="tfStmt"></div>
+      </div>
+      <div class="tf-btns">
+        <button class="tf-btn tf-t" id="tfT" onclick="tfAns(true)">✅ صح</button>
+        <button class="tf-btn tf-f" id="tfF" onclick="tfAns(false)">❌ غلط</button>
+      </div>
+      <div class="tf-fb" id="tfFb"></div>
+      <button class="tf-nxt" id="tfNxt" onclick="tfNext()">التالي ←</button>
+      <!-- result -->
+      <div class="gr" id="tf-gr">
+        <div class="gr-ico">🎯</div>
+        <div class="gr-score" id="tfGrSc">0/5</div>
+        <div class="gr-msg" id="tfGrMsg"></div>
+        <div class="gr-stars" id="tfGrStars"></div>
+        <button class="gr-btn" onclick="tfRestart()">🔄 العب مجدداً</button>
+      </div>
+    </div>
+
+    <!-- GAME: Word Order -->
+    <div class="gs" id="gs-wo">
+      <div class="gs-hdr">
+        <div class="back-btn" onclick="closeGame()">←</div>
+        <div class="gs-title">🔀 رتّب الكلمات</div>
+      </div>
+      <div class="score-bar">
+        <span>السؤال <span id="woQN">1</span>/4</span>
+        <span>✅ <span id="woSc">0</span>/4</span>
+      </div>
+      <div style="font-size:.76rem;color:var(--muted);text-align:center">رتّب الكلمات لتكوين الذكر الصحيح:</div>
+      <div class="wo-hint" id="woHint"></div>
+      <div class="wo-ans" id="woAns"></div>
+      <div class="wo-bank" id="woBnk"></div>
+      <div class="wo-fb" id="woFb"></div>
+      <div class="wo-acts">
+        <button class="wo-check" onclick="woCheck()">✔ تحقق</button>
+        <button class="wo-clr" onclick="woClear()">↩ مسح</button>
+      </div>
+      <!-- result -->
+      <div class="gr" id="wo-gr">
+        <div class="gr-ico">🔀</div>
+        <div class="gr-score" id="woGrSc">0/4</div>
+        <div class="gr-msg" id="woGrMsg"></div>
+        <div class="gr-stars" id="woGrStars"></div>
+        <button class="gr-btn" onclick="woRestart()">🔄 العب مجدداً</button>
+      </div>
+    </div>
+
+    <!-- GAME: Fill Blank -->
+    <div class="gs" id="gs-fb">
+      <div class="gs-hdr">
+        <div class="back-btn" onclick="closeGame()">←</div>
+        <div class="gs-title">✍️ أكمل الذكر</div>
+      </div>
+      <div class="score-bar">
+        <span>السؤال <span id="fbQN">1</span>/4</span>
+        <span>✅ <span id="fbSc">0</span>/4</span>
+      </div>
+      <div class="fb-line" id="fbLine"></div>
+      <div class="fb-opts" id="fbOpts"></div>
+      <div class="fb-fb" id="fbFb"></div>
+      <button class="fb-nxt" id="fbNxt" onclick="fbNext()">التالي ←</button>
+      <!-- result -->
+      <div class="gr" id="fb-gr">
+        <div class="gr-ico">✍️</div>
+        <div class="gr-score" id="fbGrSc">0/4</div>
+        <div class="gr-msg" id="fbGrMsg"></div>
+        <div class="gr-stars" id="fbGrStars"></div>
+        <button class="gr-btn" onclick="fbRestart()">🔄 العب مجدداً</button>
+      </div>
+    </div>
+
+  </div><!-- end games-sec -->
+
+</div><!-- end scroll -->
+</div><!-- end app -->
+
+<script>
+/* =========================================
+   DATA
+========================================= */
+const THEMES={
+  sabah:{bg:'#f5f0e4',card:'#fffdf7',accent:'#c8922a',accent2:'#9a6814',glow:'rgba(200,146,42,.22)',text:'#2a1800',mid:'#6b4c1e',muted:'#9a7545',border:'rgba(200,146,42,.2)',shadow:'0 4px 24px rgba(120,70,0,.1)',tbg:'rgba(200,146,42,.09)',ico:'🌅'},
+  masaa:{bg:'#ede8f5',card:'#faf8ff',accent:'#7952b3',accent2:'#5e3d96',glow:'rgba(121,82,179,.22)',text:'#1a1030',mid:'#4a3070',muted:'#8070a0',border:'rgba(121,82,179,.2)',shadow:'0 4px 24px rgba(80,40,140,.1)',tbg:'rgba(121,82,179,.09)',ico:'🌆'},
+  nawm:{bg:'#0f1628',card:'#1a2340',accent:'#6488d4',accent2:'#3d5fb5',glow:'rgba(100,136,212,.25)',text:'#e8f0ff',mid:'#9ab0dd',muted:'#607090',border:'rgba(100,136,212,.22)',shadow:'0 4px 28px rgba(0,10,40,.35)',tbg:'rgba(100,136,212,.1)',ico:'🌙'}
+};
+
+const ADHKAR={
+  sabah:{
+    label:'الصباح',doneIco:'🌟',doneMsg:'أتممت أذكار الصباح! بارك الله فيك وحفظك طوال يومك 🌅',
+    items:[
+      {title:'آية الكرسي',text:'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',meaning:'🛡️ من قرأها حين يصبح أُجير من الجن حتى يمسي',count:1,badge:'📖 قرآن'},
+      {title:'سورة الإخلاص',text:'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',meaning:'📿 تعدل ثُلث القرآن الكريم',count:3,badge:'📖 قرآن'},
+      {title:'سورة الفلق',text:'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',meaning:'🌙 تحميك من كل شر',count:3,badge:'📖 قرآن'},
+      {title:'سورة الناس',text:'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',meaning:'✨ تحميك من وسوسة الشيطان',count:3,badge:'📖 قرآن'},
+      {title:'ذكر الصباح',text:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ',meaning:'🌅 تبدأ يومك بذكر الله وتسأله خير اليوم',count:1,badge:'🤲 دعاء'},
+      {title:'سيد الاستغفار',text:'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',meaning:'💎 أفضل الاستغفار — من قاله موقناً دخل الجنة',count:1,badge:'🤲 دعاء'},
+      {title:'الرضا بالله',text:'رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلامِ دِينًا وَبِمُحَمَّدٍ ﷺ نَبِيًّا',meaning:'🌸 من قالها كان حقاً على الله أن يرضيه يوم القيامة',count:3,badge:'🤲 دعاء'},
+      {title:'الإشهاد بالتوحيد',text:'اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',meaning:'🕊️ من قالها أعتقه الله من النار',count:4,badge:'🤲 دعاء'},
+      {title:'شكر النعمة',text:'اللَّهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ، فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',meaning:'🌺 من قالها حين يصبح أدّى شكر يومه',count:1,badge:'🤲 دعاء'},
+      {title:'حسبي الله',text:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',meaning:'🏰 من قالها كفاه الله ما أهمه من أمر الدنيا والآخرة',count:7,badge:'📿 ذكر'},
+      {title:'بسم الله الحافظ',text:'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',meaning:'🛡️ لم يضره شيء من الله',count:3,badge:'📿 ذكر'},
+      {title:'دعاء الصباح',text:'اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ',meaning:'🌄 إقرار بأن حياتنا ومماتنا بيد الله',count:1,badge:'🤲 دعاء'},
+      {title:'فطرة الإسلام',text:'أَصْبَحْنَا عَلَى فِطْرَةِ الإِسْلَامِ، وَعَلَى كَلِمَةِ الإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ',meaning:'🕌 إعلان الانتماء للإسلام في بداية كل يوم',count:1,badge:'🤲 دعاء'},
+      {title:'التسبيح الكبير',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ',meaning:'💫 من أعظم التسبيح وزناً عند الله',count:3,badge:'📿 ذكر'},
+      {title:'دعاء العافية',text:'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ',meaning:'💊 تسأل الله العافية في جسدك وحواسك',count:3,badge:'🤲 دعاء'},
+      {title:'التعوذ من الكفر',text:'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ',meaning:'🛡️ استعاذة من الكفر والفقر وعذاب القبر',count:3,badge:'🤲 دعاء'},
+      {title:'دعاء العفو والعافية',text:'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي',meaning:'🌈 من أجمع أدعية الحفظ الشامل',count:1,badge:'🤲 دعاء'},
+      {title:'يا حي يا قيوم',text:'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ',meaning:'💫 من أسماء الله الحسنى الجامعة',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء النصر والفتح',text:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذَا الْيَوْمِ فَتْحَهُ وَنَصْرَهُ وَنُورَهُ وَبَرَكَتَهُ وَهُدَاهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهِ وَشَرِّ مَا بَعْدَهُ',meaning:'🌟 تسأل الله خير يومك كله',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء الغيب والشهادة',text:'اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ',meaning:'🕊️ استعاذة شاملة من شر النفس والشيطان',count:1,badge:'🤲 دعاء'},
+      {title:'الكلمات التامات',text:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',meaning:'🛡️ كلمات الله التامة كافية لكل شر',count:3,badge:'📿 ذكر'},
+      {title:'الصلاة على النبي',text:'اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَى نَبِيِّنَا مُحَمَّدٍ',meaning:'🌹 من صلى عليه حين يصبح أدركته شفاعته يوم القيامة',count:10,badge:'📿 ذكر'},
+      {title:'التعوذ من الشرك',text:'اللَّهُمَّ إِنَّا نَعُوذُ بِكَ مِنْ أَنْ نُشْرِكَ بِكَ شَيْئًا نَعْلَمُهُ، وَنَسْتَغْفِرُكَ لِمَا لَا نَعْلَمُهُ',meaning:'🕊️ استعاذة من الشرك الخفي والجلي',count:3,badge:'🤲 دعاء'},
+      {title:'التعوذ من الهم',text:'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَأَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَأَعُوذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ، وَأَعُوذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَالِ',meaning:'💪 استعاذة من أسباب الضعف والهم',count:3,badge:'🤲 دعاء'},
+      {title:'الاستغفار العظيم',text:'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',meaning:'💎 أفضل صيغ الاستغفار',count:3,badge:'📿 ذكر'},
+      {title:'دعاء العلم والرزق',text:'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا طَيِّبًا وَعَمَلًا مُتَقَبَّلًا',meaning:'🌟 جامع لخيري الدنيا والآخرة',count:1,badge:'🤲 دعاء'},
+      {title:'لا إله إلا الله',text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',meaning:'🌟 من قالها مئة مرة كانت له حرزاً من الشيطان',count:100,badge:'📿 ذكر'},
+      {title:'التسبيح',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',meaning:'🌿 تُغفر خطاياه وإن كانت مثل زَبَد البحر',count:100,badge:'📿 ذكر'},
+      {title:'الاستغفار',text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',meaning:'💫 خير الذاكرين',count:100,badge:'📿 ذكر'}
+    ],
+    games:{
+      vc:[{title:'التسبيح',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',count:100},{title:'لا إله إلا الله',text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',count:100},{title:'الاستغفار',text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',count:100},{title:'الصلاة على النبي',text:'اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى مُحَمَّدٍ',count:10}],
+      tf:[
+        {dhikr:'',stmt:'من قرأ آية الكرسي صباحاً حفظه الله حتى يمسي',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'},
+        {dhikr:'',stmt:'سورة الإخلاص تعدل نصف القرآن الكريم',ans:false,xp:'❌ خطأ! بل تعدل ثُلث القرآن الكريم'},
+        {dhikr:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',stmt:'من قالها مئة مرة غُفرت خطاياه وإن كانت مثل زَبَد البحر',ans:true,xp:'✅ صحيح! حديث متفق عليه'},
+        {dhikr:'',stmt:'حسبي الله يُقال سبع مرات في الصباح والمساء',ans:true,xp:'✅ صحيح! من السنة النبوية'},
+        {dhikr:'',stmt:'من صلى على النبي ﷺ حين يصبح أدركته شفاعته يوم القيامة',ans:true,xp:'✅ صحيح! من السنة النبوية'},
+        {dhikr:'',stmt:'بسم الله الذي لا يضر تُقال مرة واحدة في الصباح',ans:false,xp:'❌ خطأ! تُقال ثلاث مرات صباحاً ومساءً'},
+        {dhikr:'',stmt:'سيد الاستغفار يُقال مرة واحدة صباحاً',ans:true,xp:'✅ صحيح! ومرة مساءً'}
+      ],
+      wo:[
+        {words:['سُبْحَانَ','اللَّهِ','وَبِحَمْدِهِ'],hint:'التسبيح (3 كلمات)'},
+        {words:['لَا','إِلَهَ','إِلَّا','اللَّهُ'],hint:'التوحيد (4 كلمات)'},
+        {words:['أَصْبَحْنَا','وَأَصْبَحَ','الْمُلْكُ','لِلَّهِ'],hint:'ذكر الصباح (4 كلمات)'},
+        {words:['حَسْبِيَ','اللَّهُ','لَا','إِلَهَ','إِلَّا','هُوَ'],hint:'حسبي الله (6 كلمات)'},
+        {words:['رَضِيتُ','بِاللَّهِ','رَبًّا','وَبِالإِسْلامِ','دِينًا'],hint:'دعاء الرضا (5 كلمات)'}
+      ],
+      fb:[
+        {before:'سُبْحَانَ اللَّهِ',blank:'وَبِحَمْدِهِ',after:'',opts:['وَبِحَمْدِهِ','وَبِنِعْمَتِهِ','وَبِرَحْمَتِهِ']},
+        {before:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ',blank:'لِلَّهِ',after:'',opts:['لِلَّهِ','لِعِبَادِهِ','لِلنَّاسِ']},
+        {before:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ',blank:'تَوَكَّلْتُ',after:'',opts:['تَوَكَّلْتُ','آمَنْتُ','رَضِيتُ']},
+        {before:'رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلامِ',blank:'دِينًا',after:'',opts:['دِينًا','حُكْمًا','شَرِيعَةً']},
+        {before:'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا',blank:'طَيِّبًا',after:'وَعَمَلًا مُتَقَبَّلًا',opts:['طَيِّبًا','كَثِيرًا','وَاسِعًا']}
+      ]
+    }
+  },
+  masaa:{
+    label:'المساء',doneIco:'🌙',doneMsg:'أتممت أذكار المساء! بارك الله فيك وحفظك في مسائك 🌆',
+    items:[
+      {title:'آية الكرسي',text:'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',meaning:'🛡️ من قرأها حين يمسي أُجير من الجن حتى يصبح',count:1,badge:'📖 قرآن'},
+      {title:'خواتيم البقرة',text:'آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ ۝ لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ',meaning:'📖 من قرأ آيتين من آخر البقرة في ليلة كفتاه',count:1,badge:'📖 قرآن'},
+      {title:'سورة الإخلاص',text:'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',meaning:'📿 تعدل ثُلث القرآن الكريم',count:3,badge:'📖 قرآن'},
+      {title:'سورة الفلق',text:'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',meaning:'🌙 تحميك من كل شر',count:3,badge:'📖 قرآن'},
+      {title:'سورة الناس',text:'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',meaning:'✨ تحميك من وسوسة الشيطان',count:3,badge:'📖 قرآن'},
+      {title:'ذكر المساء',text:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ',meaning:'🌆 تبدأ مساءك بذكر الله وتسأله خير الليلة',count:1,badge:'🤲 دعاء'},
+      {title:'سيد الاستغفار',text:'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',meaning:'💎 من قاله موقناً ومات من ليلته دخل الجنة',count:1,badge:'🤲 دعاء'},
+      {title:'الرضا بالله',text:'رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلامِ دِينًا وَبِمُحَمَّدٍ ﷺ نَبِيًّا',meaning:'🌸 من قالها كان حقاً على الله أن يرضيه يوم القيامة',count:3,badge:'🤲 دعاء'},
+      {title:'الإشهاد بالتوحيد',text:'اللَّهُمَّ إِنِّي أَمْسَيْتُ أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلَائِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',meaning:'🕊️ من قالها أعتقه الله من النار',count:4,badge:'🤲 دعاء'},
+      {title:'شكر النعمة',text:'اللَّهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ، فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',meaning:'🌺 من قالها حين يمسي أدّى شكر يومه',count:1,badge:'🤲 دعاء'},
+      {title:'حسبي الله',text:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',meaning:'🏰 من قالها كفاه الله ما أهمه',count:7,badge:'📿 ذكر'},
+      {title:'بسم الله الحافظ',text:'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',meaning:'🛡️ لم يضره شيء من الله',count:3,badge:'📿 ذكر'},
+      {title:'دعاء المساء',text:'اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ',meaning:'🌆 إقرار بأن حياتنا ومماتنا بيد الله',count:1,badge:'🤲 دعاء'},
+      {title:'فطرة الإسلام',text:'أَمْسَيْنَا عَلَى فِطْرَةِ الإِسْلَامِ، وَعَلَى كَلِمَةِ الإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ',meaning:'🕌 إعلان الانتماء للإسلام في نهاية كل يوم',count:1,badge:'🤲 دعاء'},
+      {title:'التسبيح الكبير',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ',meaning:'💫 من أعظم التسبيح وزناً عند الله',count:3,badge:'📿 ذكر'},
+      {title:'دعاء العافية',text:'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ',meaning:'💊 تسأل الله العافية في جسدك وحواسك',count:3,badge:'🤲 دعاء'},
+      {title:'التعوذ من الكفر',text:'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ',meaning:'🛡️ استعاذة من الكفر والفقر وعذاب القبر',count:3,badge:'🤲 دعاء'},
+      {title:'دعاء العفو والعافية',text:'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي',meaning:'🌈 من أجمع أدعية الحفظ الشامل',count:1,badge:'🤲 دعاء'},
+      {title:'يا حي يا قيوم',text:'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ',meaning:'💫 من أسماء الله الحسنى الجامعة',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء الليلة',text:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذِهِ اللَّيْلَةِ فَتْحَهَا وَنَصْرَهَا وَنُورَهَا وَبَرَكَتَهَا وَهُدَاهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهَا وَشَرِّ مَا بَعْدَهَا',meaning:'🌟 تسأل الله خير ليلتك كلها',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء الغيب والشهادة',text:'اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ',meaning:'🕊️ استعاذة شاملة من شر النفس والشيطان',count:1,badge:'🤲 دعاء'},
+      {title:'الكلمات التامات',text:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',meaning:'🛡️ كلمات الله التامة كافية لكل شر',count:3,badge:'📿 ذكر'},
+      {title:'الصلاة على النبي',text:'اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَى نَبِيِّنَا مُحَمَّدٍ',meaning:'🌹 من صلى عليه حين يمسي أدركته شفاعته',count:10,badge:'📿 ذكر'},
+      {title:'التعوذ من الشرك',text:'اللَّهُمَّ إِنَّا نَعُوذُ بِكَ مِنْ أَنْ نُشْرِكَ بِكَ شَيْئًا نَعْلَمُهُ، وَنَسْتَغْفِرُكَ لِمَا لَا نَعْلَمُهُ',meaning:'🕊️ استعاذة من الشرك الخفي والجلي',count:3,badge:'🤲 دعاء'},
+      {title:'لا إله إلا الله',text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',meaning:'🌟 من قالها مئة مرة كانت له حرزاً من الشيطان',count:100,badge:'📿 ذكر'},
+      {title:'التسبيح',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',meaning:'🌿 تُغفر خطاياه وإن كانت مثل زَبَد البحر',count:100,badge:'📿 ذكر'},
+      {title:'الاستغفار',text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',meaning:'💫 خير الذاكرين',count:100,badge:'📿 ذكر'}
+    ],
+    games:{
+      vc:[{title:'التسبيح',text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',count:100},{title:'لا إله إلا الله',text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',count:100},{title:'الاستغفار',text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',count:100},{title:'الصلاة على النبي',text:'اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى مُحَمَّدٍ',count:10}],
+      tf:[
+        {dhikr:'',stmt:'من قرأ آية الكرسي مساءً حفظه الله حتى يصبح',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'},
+        {dhikr:'',stmt:'خواتيم البقرة تُقرأ في المساء لأنها تكفي قارئها',ans:true,xp:'✅ صحيح! من قرأ آيتين من آخر البقرة كفتاه'},
+        {dhikr:'',stmt:'ذكر المساء يبدأ بـ «أمسينا وأمسى الملك لله»',ans:true,xp:'✅ صحيح! من أذكار المساء المأثورة'},
+        {dhikr:'',stmt:'حسبي الله تُقال ثلاث مرات في المساء',ans:false,xp:'❌ خطأ! تُقال سبع مرات'},
+        {dhikr:'',stmt:'سيد الاستغفار أفضل أنواع الاستغفار',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'}
+      ],
+      wo:[
+        {words:['أَمْسَيْنَا','وَأَمْسَى','الْمُلْكُ','لِلَّهِ'],hint:'ذكر المساء (4 كلمات)'},
+        {words:['سُبْحَانَ','اللَّهِ','وَبِحَمْدِهِ'],hint:'التسبيح (3 كلمات)'},
+        {words:['رَضِيتُ','بِاللَّهِ','رَبًّا','وَبِالإِسْلامِ','دِينًا'],hint:'دعاء الرضا (5 كلمات)'},
+        {words:['حَسْبِيَ','اللَّهُ','لَا','إِلَهَ','إِلَّا','هُوَ'],hint:'حسبي الله (6 كلمات)'}
+      ],
+      fb:[
+        {before:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ',blank:'لِلَّهِ',after:'',opts:['لِلَّهِ','لِعِبَادِهِ','لِلنَّاسِ']},
+        {before:'سُبْحَانَ اللَّهِ',blank:'وَبِحَمْدِهِ',after:'',opts:['وَبِحَمْدِهِ','وَبِنِعْمَتِهِ','وَبِرَحْمَتِهِ']},
+        {before:'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي',blank:'سَمْعِي',after:'',opts:['سَمْعِي','قَلْبِي','يَدَيَّ']},
+        {before:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ',blank:'مَا خَلَقَ',after:'',opts:['مَا خَلَقَ','كُلِّ شَيْءٍ','الشَّيْطَانِ']}
+      ]
+    }
+  },
+  nawm:{
+    label:'النوم',doneIco:'✨',doneMsg:'أتممت أذكار النوم! نام النبي ﷺ على هذه الأذكار. بارك الله فيك ورزقك نوماً هنيئاً 🌙',
+    items:[
+      {title:'دعاء الفراش',text:'بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ',meaning:'🌙 قاله النبي ﷺ حين يضع جنبه على الفراش',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء الحياة والممات',text:'اللَّهُمَّ إِنَّكَ خَلَقْتَ نَفْسِي وَأَنْتَ تَوَفَّاهَا، لَكَ مَمَاتُهَا وَمَحْيَاهَا، إِنْ أَحْيَيْتَهَا فَاحْفَظْهَا، وَإِنْ أَمَتَّهَا فَاغْفِرْ لَهَا، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ',meaning:'🙏 تفويض الأمر لله في الحياة والممات',count:1,badge:'🤲 دعاء'},
+      {title:'اللهم قني عذابك',text:'اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ',meaning:'🛡️ من قالها ثلاثاً صرف الله عنه عذاب يوم القيامة',count:3,badge:'🤲 دعاء'},
+      {title:'باسمك اللهم',text:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',meaning:'😴 من سنة النبي ﷺ حين يأوي إلى فراشه',count:1,badge:'🤲 دعاء'},
+      {title:'الحمد على النعمة',text:'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا، وَكَفَانَا، وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ',meaning:'💝 شكر الله على نعمة الطعام والشراب والمأوى',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء الغيب والشهادة',text:'اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ',meaning:'🕊️ استعاذة قبل النوم من شر النفس والشيطان',count:1,badge:'🤲 دعاء'},
+      {title:'دعاء التسليم لله',text:'اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ',meaning:'🌙 تسلم نفسك لله وتتوكل عليه قبل النوم',count:1,badge:'🤲 دعاء'},
+      {title:'آية الكرسي',text:'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',meaning:'🛡️ من قرأها قبل النوم لم يقربه شيطان حتى يصبح',count:1,badge:'📖 قرآن'},
+      {title:'خواتيم البقرة',text:'آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ ۝ لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ',meaning:'📖 من قرأهما في ليلة كفتاه',count:1,badge:'📖 قرآن'},
+      {title:'تسبيح فاطمة',text:'سُبْحَانَ اللَّهِ (٣٣) ● الْحَمْدُ لِلَّهِ (٣٣) ● اللَّهُ أَكْبَرُ (٣٤)',meaning:'💎 علّمه النبي ﷺ لفاطمة رضي الله عنها — خيرٌ مما سألتِ',count:100,badge:'📿 ذكر',tasbih:true},
+      {title:'المعوذتان مع النفث',text:'يجمع كفيه ثم ينفث فيهما ويقرأ: قُلْ هُوَ اللَّهُ أَحَدٌ ۝ وقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ وقُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ ثم يمسح بهما ما استطاع من جسده يبدأ برأسه ووجهه',meaning:'🌟 سنة نبوية في حفظ الجسد قبل النوم',count:3,badge:'📖 قرآن'}
+    ],
+    games:{
+      vc:[{title:'اللهم قني',text:'اللَّهُمَّ قِنِي عَذَابَكَ',count:3},{title:'سبحان الله',text:'سُبْحَانَ اللَّهِ',count:33},{title:'الحمد لله',text:'الْحَمْدُ لِلَّهِ',count:33},{title:'الله أكبر',text:'اللَّهُ أَكْبَرُ',count:34}],
+      tf:[
+        {dhikr:'',stmt:'آية الكرسي قبل النوم تحفظك من الشيطان طوال الليل',ans:true,xp:'✅ صحيح! قاله النبي ﷺ'},
+        {dhikr:'',stmt:'تسبيح فاطمة: سبحان الله 33 والحمد لله 33 والله أكبر 34',ans:true,xp:'✅ صحيح! علّمه النبي ﷺ لفاطمة رضي الله عنها'},
+        {dhikr:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',stmt:'هذا الدعاء يُقال عند الاستيقاظ من النوم',ans:false,xp:'❌ خطأ! يُقال عند النوم، وعند الاستيقاظ: الحمد لله الذي أحيانا'},
+        {dhikr:'',stmt:'خواتيم البقرة تُقرأ قبل النوم وتكفي قارئها',ans:true,xp:'✅ صحيح! من قرأ آيتين من آخر البقرة كفتاه'},
+        {dhikr:'',stmt:'علّم النبي ﷺ تسبيح فاطمة لابنته فاطمة رضي الله عنها',ans:true,xp:'✅ صحيح! علّمها إياه بدلاً من خادمة طلبتها'}
+      ],
+      wo:[
+        {words:['بِاسْمِكَ','اللَّهُمَّ','أَمُوتُ','وَأَحْيَا'],hint:'دعاء النوم (4 كلمات)'},
+        {words:['اللَّهُمَّ','قِنِي','عَذَابَكَ','يَوْمَ','تَبْعَثُ','عِبَادَكَ'],hint:'دعاء الحماية (6 كلمات)'},
+        {words:['الْحَمْدُ','لِلَّهِ','الَّذِي','أَطْعَمَنَا','وَسَقَانَا'],hint:'دعاء الشكر (5 كلمات)'},
+        {words:['بِاسْمِكَ','رَبِّي','وَضَعْتُ','جَنْبِي'],hint:'دعاء الفراش (4 كلمات)'}
+      ],
+      fb:[
+        {before:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ',blank:'وَأَحْيَا',after:'',opts:['وَأَحْيَا','وَأَنَامُ','وَأَقُومُ']},
+        {before:'اللَّهُمَّ',blank:'قِنِي',after:'عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ',opts:['قِنِي','أَعِنِّي','ارْزُقْنِي']},
+        {before:'بِاسْمِكَ رَبِّي وَضَعْتُ',blank:'جَنْبِي',after:'وَبِكَ أَرْفَعُهُ',opts:['جَنْبِي','يَدَيَّ','رَأْسِي']},
+        {before:'اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ وَفَوَّضْتُ',blank:'أَمْرِي',after:'إِلَيْكَ',opts:['أَمْرِي','دِينِي','قَلْبِي']}
+      ]
+    }
+  }
+};
+let activeTab='sabah';
+let activeSub='adhkar';
+let activeGame=null;
+
+const AS={
+  sabah:{idx:0,cnt:0,mem:false,aud:false,done:false,streak:0,stars:0,tb:[0,0,0]},
+  masaa:{idx:0,cnt:0,mem:false,aud:false,done:false,streak:0,stars:0,tb:[0,0,0]},
+  nawm:{idx:0,cnt:0,mem:false,aud:false,done:false,streak:0,stars:0,tb:[0,0,0]}
+};
+
+let tfQI=0,tfSco=0,tfQs=[];
+let woQI=0,woSco=0,woQs=[],woAns=[],woBnk=[];
+let fbQI=0,fbSco=0,fbQs=[];
+let vcItem=null,vcCnt=0;
+
+/* =========================================
+   THEME
+========================================= */
+function applyTheme(tab){
+  const t=THEMES[tab];
+  const r=document.documentElement;
+  r.style.setProperty('--bg',t.bg);
+  r.style.setProperty('--card',t.card);
+  r.style.setProperty('--accent',t.accent);
+  r.style.setProperty('--accent2',t.accent2);
+  r.style.setProperty('--glow',t.glow);
+  r.style.setProperty('--text',t.text);
+  r.style.setProperty('--mid',t.mid);
+  r.style.setProperty('--muted',t.muted);
+  r.style.setProperty('--border',t.border);
+  r.style.setProperty('--shadow',t.shadow);
+  r.style.setProperty('--tbg',t.tbg);
+  document.getElementById('hdrIco').textContent=t.ico;
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+function switchTab(tab){
+  misharyStop();
+  activeTab=tab;
+  ['sabah','masaa','nawm'].forEach(t=>{
+    document.getElementById('tb-'+t).classList.toggle('on',t===tab);
+  });
+  applyTheme(tab);
+  closeGame();
+  renderAdhkar();
+  renderGames();
+  if(activeSub==='adhkar') showAdhkarSec();
+  else showGamesSec();
+  updateMisharyBar(tab);
+}
+
+function switchSub(sub){
+  activeSub=sub;
+  document.getElementById('sb-adhkar').classList.toggle('on',sub==='adhkar');
+  document.getElementById('sb-games').classList.toggle('on',sub==='games');
+  if(sub==='adhkar'){showAdhkarSec();}
+  else{showGamesSec();}
+}
+
+function showAdhkarSec(){
+  document.getElementById('adhkar-sec').classList.add('on');
+  document.getElementById('games-sec').classList.remove('on');
+  document.getElementById('misharyBar').style.display='';
+}
+function showGamesSec(){
+  document.getElementById('adhkar-sec').classList.remove('on');
+  document.getElementById('games-sec').classList.add('on');
+  document.getElementById('misharyBar').style.display='none';
+}
+
+/* =========================================
+   ADHKAR ENGINE
+========================================= */
+function save(tab){
+  const s=AS[tab];
+  localStorage.setItem('adhr_'+tab,JSON.stringify({
+    date:new Date().toDateString(),idx:s.idx,done:s.done,streak:s.streak,stars:s.stars
+  }));
+}
+
+function loadAll(){
+  const today=new Date().toDateString();
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  ['sabah','masaa','nawm'].forEach(tab=>{
+    const raw=localStorage.getItem('adhr_'+tab);
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    AS[tab].streak=d.streak||0;
+    AS[tab].stars=d.stars||0;
+    if(d.date===today){
+      AS[tab].done=d.done||false;
+      AS[tab].idx=d.done?ADHKAR[tab].items.length:(d.idx||0);
+    } else {
+      // streak logic
+      if(d.done && d.date===yest.toDateString()){
+        AS[tab].streak=(d.streak||0)+1;
+      } else if(!d.done){
+        AS[tab].streak=0;
+      }
+      AS[tab].done=false;AS[tab].idx=0;
+    }
+  });
+}
+
+function renderAdhkar(){
+  const tab=activeTab;
+  const s=AS[tab];
+  const d=ADHKAR[tab];
+  const TOTAL=d.items.length;
+
+  // stats
+  document.getElementById('strkN').textContent=s.streak;
+  document.getElementById('globalStreak').textContent=s.streak;
+  updateStars(s.streak,s.stars);
+
+  // done?
+  if(s.done||s.idx>=TOTAL){showDone(tab);return;}
+
+  document.getElementById('doneScr').classList.remove('on');
+  document.getElementById('dcard').style.display='';
+
+  // progress
+  const pct=Math.round((s.idx/TOTAL)*100);
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=s.idx+'/'+TOTAL;
+
+  // dots
+  const dotsEl=document.getElementById('dotsEl');
+  dotsEl.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const dot=document.createElement('div');
+    dot.className='dot'+(i<s.idx?' done':i===s.idx?' cur':'');
+    if(i<=s.idx)dot.onclick=()=>goToAdhkar(i);
+    dotsEl.appendChild(dot);
+  }
+
+  renderCard();
+}
+
+function renderCard(){
+  const tab=activeTab;const s=AS[tab];
+  const item=ADHKAR[tab].items[s.idx];
+  document.getElementById('dcBadge').textContent=item.badge;
+  document.getElementById('dcN').textContent=s.idx+1;
+  document.getElementById('dcTitle').textContent=item.title;
+  document.getElementById('dtext').textContent=item.text;
+  document.getElementById('dmean').textContent=item.meaning;
+  // سهام التنقل
+  const TOTAL=ADHKAR[activeTab].items.length;
+  document.getElementById('prevArr').disabled=(s.idx===0);
+  document.getElementById('nextArr').disabled=false;
+  document.getElementById('navPos').textContent=(s.idx+1)+'/'+TOTAL;
+  document.getElementById('ctrN').textContent='0';
+  document.getElementById('ctrTot').textContent='الهدف: '+item.count+(item.count>1?' مرات':' مرة');
+  document.getElementById('ctrLbl').textContent=item.count===1?'اضغط مرة واحدة':'اضغط '+item.count+' مرات';
+  document.getElementById('nxtBtn').classList.remove('on');
+  document.getElementById('dtext').classList.toggle('blur',s.mem);
+  document.getElementById('memTog').classList.toggle('on',s.mem);
+  // tasbih
+  const isTasbih=!!item.tasbih;
+  document.getElementById('normCtr').style.display=isTasbih?'none':'flex';
+  document.getElementById('tasbihCtr').style.display=isTasbih?'flex':'none';
+  if(isTasbih){s.tb=[0,0,0];[0,1,2].forEach(i=>{document.getElementById('tbn'+i).textContent='0';document.getElementById('tbi'+i).classList.remove('done');})}
+  s.cnt=0;
+  misharyStop();
+}
+
+function goToAdhkar(i){
+  const s=AS[activeTab];
+  misharyStop();s.idx=i;s.cnt=0;
+  animCard();
+  setTimeout(()=>renderAdhkar(),180);
+}
+
+function animCard(){
+  const c=document.getElementById('dcard');
+  c.style.transition='transform .18s,opacity .18s';
+  c.style.transform='translateX(16px)';c.style.opacity='0';
+  setTimeout(()=>{c.style.transition='';c.style.transform='';c.style.opacity='';},180);
+}
+
+function handleTap(e){
+  const tab=activeTab;const s=AS[tab];
+  const item=ADHKAR[tab].items[s.idx];
+  if(s.cnt>=item.count)return;
+  // ripple
+  const btn=e.currentTarget;
+  const r=document.createElement('div');r.className='ripple';
+  const rc=btn.getBoundingClientRect();
+  r.style.cssText=`left:${e.clientX-rc.left}px;top:${e.clientY-rc.top}px;width:20px;height:20px;margin:-10px 0 0 -10px`;
+  btn.appendChild(r);setTimeout(()=>r.remove(),500);
+  s.cnt++;
+  const nd=document.getElementById('ctrN');
+  nd.textContent=s.cnt;nd.classList.add('bump');setTimeout(()=>nd.classList.remove('bump'),140);
+  if(navigator.vibrate)navigator.vibrate(20);
+  if(s.cnt>=item.count)markDone();
+}
+
+function tapTasbih(i){
+  const s=AS[activeTab];
+  const goals=[33,33,34];
+  if(s.tb[i]>=goals[i])return;
+  s.tb[i]++;
+  if(navigator.vibrate)navigator.vibrate(18);
+  const nd=document.getElementById('tbn'+i);
+  nd.textContent=s.tb[i];nd.classList.add('bump');setTimeout(()=>nd.classList.remove('bump'),140);
+  if(s.tb[i]>=goals[i])document.getElementById('tbi'+i).classList.add('done');
+  if(s.tb[0]>=33&&s.tb[1]>=33&&s.tb[2]>=34)markDone();
+}
+
+function markDone(){
+  document.getElementById('nxtBtn').classList.add('on');
+  document.getElementById('ctrLbl').textContent='✅ أحسنت! اضغط التالي';
+  const dots=document.querySelectorAll('.dot');
+  const s=AS[activeTab];
+  if(dots[s.idx])dots[s.idx].className='dot done';
+}
+
+function nextDhikr(){
+  const tab=activeTab;const s=AS[tab];
+  misharyStop();s.idx++;save(tab);
+  animCard();
+  setTimeout(()=>renderAdhkar(),180);
+}
+
+function resetAdhkar(){
+  const tab=activeTab;const s=AS[tab];
+  s.idx=0;s.done=false;s.cnt=0;s.tb=[0,0,0];
+  save(tab);
+  document.getElementById('doneScr').classList.remove('on');
+  document.getElementById('dcard').style.display='';
+  renderAdhkar();
+}
+
+function showDone(tab){
+  const s=AS[tab];
+  if(!s.done){
+    s.done=true;s.stars+=3;
+    const prev=JSON.parse(localStorage.getItem('adhr_'+tab)||'{}');
+    const today=new Date().toDateString();
+    const yest=new Date();yest.setDate(yest.getDate()-1);
+    if(prev.date===yest.toDateString()&&prev.done){s.streak=(prev.streak||0)+1;}
+    else if(prev.date!==today){s.streak=1;}
+    save(tab);
+    confetti();
+  }
+  document.getElementById('dcard').style.display='none';
+  document.getElementById('progFill').style.width='100%';
+  document.getElementById('progTxt').textContent=ADHKAR[tab].items.length+'/'+ADHKAR[tab].items.length;
+  document.getElementById('doneIco').textContent=ADHKAR[tab].doneIco;
+  document.getElementById('doneMsg').textContent=ADHKAR[tab].doneMsg;
+  document.getElementById('dStrkV').textContent=s.streak;
+  document.getElementById('dStarsV').textContent=s.stars;
+  document.getElementById('doneScr').classList.add('on');
+  document.getElementById('strkN').textContent=s.streak;
+  document.getElementById('globalStreak').textContent=s.streak;
+  updateStars(s.streak,s.stars);
+}
+
+function updateStars(streak,total){
+  for(let i=1;i<=3;i++)document.getElementById('si'+i).classList.toggle('on',streak>=i);
+  document.getElementById('stTotal').textContent='×'+total;
+}
+
+/* =========================================
+   MEMORIZE & AUDIO
+========================================= */
+function toggleMem(){
+  const s=AS[activeTab];s.mem=!s.mem;
+  document.getElementById('memTog').classList.toggle('on',s.mem);
+  document.getElementById('dtext').classList.toggle('blur',s.mem);
+}
+function revealText(){
+  const s=AS[activeTab];if(!s.mem)return;
+  const el=document.getElementById('dtext');
+  el.classList.remove('blur');
+  setTimeout(()=>el.classList.add('blur'),3500);
+}
+
+/* =========================================
+   MISHARY RASHID — شريط الصوت الكامل
+========================================= */
+// روابط مباشرة من islamhouse.com
+const MISHARY_URLS={
+  sabah: 'https://d1.islamhouse.com/data/ar/ih_sounds/chain_01/Mishari_Raashid/Azkar_AlSba7_w_AlMsa/ar_1434_Azkar_AlSba7.mp3',
+  masaa: 'https://d1.islamhouse.com/data/ar/ih_sounds/chain_01/Mishari_Raashid/Azkar_AlSba7_w_AlMsa/ar_1434_Azkar_AlMsa.mp3',
+  nawm:  'https://d1.islamhouse.com/data/ar/ih_sounds/chain/ar_Mashari_Athkar/ar_Mashari_Azkar06.mp3'
+};
+const MISHARY_LABELS={sabah:'أذكار الصباح',masaa:'أذكار المساء',nawm:'أذكار النوم'};
+
+let mAudio=null;
+let mPlaying=false;
+let mRaf=null;
+
+function misharyInit(tab){
+  // stop current if tab changed
+  if(mAudio&&mAudio.dataset.tab!==tab){misharyStop();}
+  if(!mAudio){
+    mAudio=new Audio();
+    mAudio.dataset.tab=tab;
+    mAudio.src=MISHARY_URLS[tab];
+    mAudio.preload='metadata';
+    mAudio.ontimeupdate=misharyUpdateProgress;
+    mAudio.onloadedmetadata=misharyUpdateProgress;
+    mAudio.onended=()=>{mPlaying=false;document.getElementById('mPlay').textContent='▶';document.getElementById('mPlay').classList.remove('active');cancelAnimationFrame(mRaf);};
+    mAudio.onerror=()=>{misharyStop();};
+  }
+  document.getElementById('misharyLabel').textContent=MISHARY_LABELS[tab];
+}
+
+function misharyToggle(){
+  const tab=activeTab;
+  misharyInit(tab);
+  if(mPlaying){
+    mAudio.pause();mPlaying=false;
+    document.getElementById('mPlay').textContent='▶';
+    document.getElementById('mPlay').classList.remove('active');
+  } else {
+    mAudio.play().then(()=>{
+      mPlaying=true;
+      document.getElementById('mPlay').textContent='⏸';
+      document.getElementById('mPlay').classList.add('active');
+    }).catch(()=>{});
+  }
+}
+
+function misharyStop(){
+  if(mAudio){mAudio.pause();mAudio.currentTime=0;mAudio=null;}
+  mPlaying=false;
+  const pb=document.getElementById('mPlay');
+  if(pb){pb.textContent='▶';pb.classList.remove('active');}
+  document.getElementById('misharyFill').style.width='0%';
+  document.getElementById('mCurT').textContent='0:00';
+  document.getElementById('mDurT').textContent='--:--';
+}
+
+function misharyUpdateProgress(){
+  if(!mAudio)return;
+  const cur=mAudio.currentTime||0;
+  const dur=mAudio.duration||0;
+  const pct=dur>0?(cur/dur*100):0;
+  document.getElementById('misharyFill').style.width=pct+'%';
+  document.getElementById('mCurT').textContent=fmtTime(cur);
+  document.getElementById('mDurT').textContent=dur>0?fmtTime(dur):'--:--';
+}
+
+function misharySeek(e){
+  if(!mAudio||!mAudio.duration)return;
+  const bar=e.currentTarget;
+  const ratio=e.offsetX/bar.offsetWidth;
+  mAudio.currentTime=ratio*mAudio.duration;
+}
+
+function fmtTime(s){
+  const m=Math.floor(s/60);
+  const sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+// update label when tab switches
+function updateMisharyBar(tab){
+  misharyInit(tab);
+  document.getElementById('misharyLabel').textContent=MISHARY_LABELS[tab];
+}
+
+/* =========================================
+   NAVIGATION ARROWS
+========================================= */
+function navDhikr(dir){
+  const tab=activeTab;
+  const s=AS[tab];
+  const TOTAL=ADHKAR[tab].items.length;
+  const newIdx=s.idx+dir;
+  if(newIdx<0||newIdx>=TOTAL)return;
+  misharyStop();
+  s.idx=newIdx;s.cnt=0;
+  animCard();
+  setTimeout(()=>renderAdhkar(),180);
+}
+
+/* =========================================
+   GAMES NAVIGATION
+========================================= */
+function renderGames(){
+  const tab=activeTab;
+  const gd=ADHKAR[tab].games;
+  // Visual counter picker
+  const vcList=document.getElementById('vc-list');
+  vcList.innerHTML='';
+  gd.vc.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='vc-item';
+    d.innerHTML=`<span class="vc-iname">${item.title}</span><span class="vc-icnt">× ${item.count}</span>`;
+    d.onclick=()=>vcStart(i);vcList.appendChild(d);
+  });
+}
+
+function openGame(g){
+  activeGame=g;
+  document.getElementById('g-home').style.display='none';
+  document.querySelectorAll('.gs').forEach(el=>el.classList.remove('on'));
+  document.getElementById('gs-'+g).classList.add('on');
+  if(g==='tf')tfInit();
+  else if(g==='wo')woInit();
+  else if(g==='fb')fbInit();
+  else if(g==='vc'){vcReset();}
+}
+
+function closeGame(){
+  activeGame=null;
+  document.querySelectorAll('.gs').forEach(el=>el.classList.remove('on'));
+  document.getElementById('g-home').style.display='';
+}
+
+/* =========================================
+   GAME 1: VISUAL COUNTER
+========================================= */
+const VC_STAGES=[
+  {at:0,e:'🌱'},{at:20,e:'🌿'},{at:40,e:'🌸'},{at:60,e:'🌳'},{at:80,e:'🌲'},{at:100,e:'🌺'}
+];
+let vcStage=-1;
+
+function vcStart(i){
+  const gd=ADHKAR[activeTab].games;
+  vcItem=gd.vc[i];vcCnt=0;vcStage=-1;
+  document.getElementById('vc-list').style.display='none';
+  const playEl=document.getElementById('vc-play');
+  playEl.classList.add('on');
+  document.getElementById('vcTxt').textContent=vcItem.text;
+  document.getElementById('vcDoneMsg').classList.remove('on');
+  updateVcRing();
+}
+
+function vcReset(){
+  vcItem=null;vcCnt=0;vcStage=-1;
+  document.getElementById('vc-list').style.display='';
+  document.getElementById('vc-play').classList.remove('on');
+  document.getElementById('vcRing').style.strokeDashoffset='450';
+  document.getElementById('vcEmoji').textContent='🌱';
+  document.getElementById('vcDoneMsg').classList.remove('on');
+}
+
+function vcTap(){
+  if(!vcItem||vcCnt>=vcItem.count)return;
+  vcCnt++;
+  if(navigator.vibrate)navigator.vibrate(15);
+  updateVcRing();
+}
+
+function updateVcRing(){
+  if(!vcItem)return;
+  const pct=vcItem.count===1?vcCnt*100:Math.round((vcCnt/vcItem.count)*100);
+  const circ=2*Math.PI*70;
+  const offset=circ-(circ*pct/100);
+  document.getElementById('vcRing').style.strokeDashoffset=offset;
+  document.getElementById('vcRing').setAttribute('stroke-dasharray',circ);
+  document.getElementById('vcProg').textContent=vcCnt+' / '+vcItem.count;
+
+  // stage emoji
+  let newStage=0;
+  VC_STAGES.forEach((st,i)=>{if(pct>=st.at)newStage=i;});
+  if(newStage!==vcStage){
+    vcStage=newStage;
+    const em=document.getElementById('vcEmoji');
+    em.textContent=VC_STAGES[newStage].e;
+    em.classList.add('pop');setTimeout(()=>em.classList.remove('pop'),400);
+  }
+  if(vcCnt>=vcItem.count){
+    document.getElementById('vcDoneMsg').classList.add('on');
+    confetti();
+  }
+}
+
+/* =========================================
+   GAME 2: TRUE / FALSE
+========================================= */
+function tfInit(){
+  const gd=ADHKAR[activeTab].games;
+  tfQs=[...gd.tf].sort(()=>Math.random()-.5).slice(0,5);
+  tfQI=0;tfSco=0;
+  document.getElementById('tf-gr').classList.remove('on');
+  tfRenderQ();
+}
+
+function tfRenderQ(){
+  const q=tfQs[tfQI];
+  document.getElementById('tfQN').textContent=tfQI+1;
+  document.getElementById('tfQNum').textContent='السؤال '+(tfQI+1)+' من 5';
+  document.getElementById('tfSc').textContent=tfSco;
+  document.getElementById('tfDhikr').textContent=q.dhikr||'';
+  document.getElementById('tfStmt').textContent=q.stmt;
+  document.getElementById('tfFb').className='tf-fb';
+  document.getElementById('tfFb').textContent='';
+  document.getElementById('tfNxt').classList.remove('on');
+  const tBtn=document.getElementById('tfT');const fBtn=document.getElementById('tfF');
+  tBtn.className='tf-btn tf-t';fBtn.className='tf-btn tf-f';
+  tBtn.disabled=false;fBtn.disabled=false;
+}
+
+function tfAns(ans){
+  const q=tfQs[tfQI];
+  const correct=ans===q.ans;
+  if(correct)tfSco++;
+  document.getElementById('tfSc').textContent=tfSco;
+  const tBtn=document.getElementById('tfT');const fBtn=document.getElementById('tfF');
+  tBtn.disabled=true;fBtn.disabled=true;
+  if(ans===true){tBtn.classList.add(correct?'ans-c':'ans-right');}
+  else{fBtn.classList.add(correct?'ans-c':'ans-right');}
+  if(!correct){if(ans===true)fBtn.classList.add('ans-right');else tBtn.classList.add('ans-right');}
+  const fb=document.getElementById('tfFb');
+  fb.textContent=q.xp;fb.className='tf-fb on '+(correct?'ok':'no');
+  document.getElementById('tfNxt').classList.add('on');
+}
+
+function tfNext(){
+  tfQI++;
+  if(tfQI>=5){tfShowResult();return;}
+  document.getElementById('tfNxt').classList.remove('on');
+  tfRenderQ();
+}
+
+function tfShowResult(){
+  const stars=tfSco>=5?'⭐⭐⭐':tfSco>=3?'⭐⭐':tfSco>=1?'⭐':'';
+  const msgs=['استمر في التعلم! 💪','جيد جداً! 👍','ممتاز! 🌟','مثالي! ما شاء الله! 🎯'];
+  const mi=tfSco<=1?0:tfSco<=2?1:tfSco<=4?2:3;
+  document.getElementById('tfGrSc').textContent=tfSco+'/5';
+  document.getElementById('tfGrMsg').textContent=msgs[mi];
+  document.getElementById('tfGrStars').textContent=stars;
+  document.getElementById('tf-gr').classList.add('on');
+  if(tfSco>=3)confetti();
+}
+
+function tfRestart(){document.getElementById('tf-gr').classList.remove('on');tfInit();}
+
+/* =========================================
+   GAME 3: WORD ORDER
+========================================= */
+function woInit(){
+  const gd=ADHKAR[activeTab].games;
+  woQs=[...gd.wo].sort(()=>Math.random()-.5);
+  woQI=0;woSco=0;
+  document.getElementById('wo-gr').classList.remove('on');
+  woRenderQ();
+}
+
+function woRenderQ(){
+  const q=woQs[woQI];
+  woAns=[];
+  woBnk=q.words.map((w,i)=>({w,i,used:false}));
+  // shuffle bank
+  for(let i=woBnk.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[woBnk[i],woBnk[j]]=[woBnk[j],woBnk[i]];}
+  document.getElementById('woQN').textContent=woQI+1;
+  document.getElementById('woSc').textContent=woSco;
+  document.getElementById('woHint').textContent=q.hint;
+  document.getElementById('woFb').className='wo-fb';
+  document.getElementById('woFb').textContent='';
+  document.getElementById('woAns').className='wo-ans';
+  renderWoBank();renderWoAns();
+}
+
+function renderWoBank(){
+  const el=document.getElementById('woBnk');el.innerHTML='';
+  woBnk.forEach((item,bi)=>{
+    const d=document.createElement('div');
+    d.className='wo-word'+(item.used?' gone':'');
+    d.textContent=item.w;
+    d.onclick=()=>woPick(bi);
+    el.appendChild(d);
+  });
+}
+
+function renderWoAns(){
+  const el=document.getElementById('woAns');el.innerHTML='';
+  woAns.forEach((_,ai)=>{
+    const d=document.createElement('div');
+    d.className='wo-word picked';
+    d.textContent=woBnk.find(b=>b.idx_in_ans===ai)?.w||'';
+    d.onclick=()=>woRemove(ai);
+    el.appendChild(d);
+  });
+}
+
+function woPick(bi){
+  const item=woBnk[bi];
+  if(item.used)return;
+  item.used=true;item.idx_in_ans=woAns.length;
+  woAns.push(bi);
+  renderWoBank();renderWoAns();
+}
+
+function woRemove(ai){
+  const bi=woAns[ai];
+  woBnk[bi].used=false;delete woBnk[bi].idx_in_ans;
+  woAns.splice(ai,1);
+  // reindex
+  woAns.forEach((bIdx,i)=>woBnk[bIdx].idx_in_ans=i);
+  renderWoBank();renderWoAns();
+}
+
+function woClear(){
+  woBnk.forEach(b=>{b.used=false;delete b.idx_in_ans;});
+  woAns=[];
+  document.getElementById('woAns').className='wo-ans';
+  document.getElementById('woFb').className='wo-fb';
+  document.getElementById('woFb').textContent='';
+  renderWoBank();renderWoAns();
+}
+
+function woCheck(){
+  if(woAns.length===0)return;
+  const q=woQs[woQI];
+  const userWords=woAns.map(bi=>woBnk[bi].w);
+  const correct=q.words.join(' ')===userWords.join(' ');
+  const ansEl=document.getElementById('woAns');
+  ansEl.className='wo-ans '+(correct?'ok':'no');
+  const fb=document.getElementById('woFb');
+  if(correct){
+    fb.className='wo-fb ok';fb.textContent='✅ أحسنت! الترتيب صحيح';
+    woSco++;document.getElementById('woSc').textContent=woSco;
+    setTimeout(()=>{woQI++;if(woQI>=woQs.length){woShowResult();}else{woRenderQ();}},1200);
+  } else {
+    fb.className='wo-fb no';fb.textContent='❌ الترتيب غير صحيح، حاول مجدداً';
+    setTimeout(()=>{woClear();},1000);
+  }
+}
+
+function woShowResult(){
+  const stars=woSco>=4?'⭐⭐⭐':woSco>=3?'⭐⭐':woSco>=2?'⭐':'';
+  const msgs=['استمر في المحاولة! 💪','جيد! 👍','ممتاز! 🌟','مثالي! ما شاء الله! 🎯'];
+  const mi=woSco<=0?0:woSco<=1?1:woSco<=3?2:3;
+  document.getElementById('woGrSc').textContent=woSco+'/4';
+  document.getElementById('woGrMsg').textContent=msgs[mi];
+  document.getElementById('woGrStars').textContent=stars;
+  document.getElementById('wo-gr').classList.add('on');
+  if(woSco>=3)confetti();
+}
+
+function woRestart(){document.getElementById('wo-gr').classList.remove('on');woInit();}
+
+/* =========================================
+   GAME 4: FILL BLANK
+========================================= */
+function fbInit(){
+  const gd=ADHKAR[activeTab].games;
+  fbQs=[...gd.fb].sort(()=>Math.random()-.5);
+  fbQI=0;fbSco=0;
+  document.getElementById('fb-gr').classList.remove('on');
+  fbRenderQ();
+}
+
+function fbRenderQ(){
+  const q=fbQs[fbQI];
+  document.getElementById('fbQN').textContent=fbQI+1;
+  document.getElementById('fbSc').textContent=fbSco;
+  document.getElementById('fbFb').className='fb-fb';
+  document.getElementById('fbFb').textContent='';
+  document.getElementById('fbNxt').classList.remove('on');
+
+  // Build the dhikr line with blank
+  const line=document.getElementById('fbLine');
+  const blankHTML=`<span class="fb-blank" id="fbBlankEl">_____</span>`;
+  line.innerHTML=(q.before?' ':'')+q.before+' '+blankHTML+(q.after?' '+q.after:'');
+
+  // Options (shuffle)
+  const opts=[...q.opts].sort(()=>Math.random()-.5);
+  const optsEl=document.getElementById('fbOpts');optsEl.innerHTML='';
+  opts.forEach(opt=>{
+    const d=document.createElement('div');d.className='fb-opt';d.textContent=opt;
+    d.onclick=()=>fbPick(opt,q.blank,d,optsEl,q);
+    optsEl.appendChild(d);
+  });
+}
+
+function fbPick(chosen,correct,el,optsEl,q){
+  const isCorrect=chosen===correct;
+  if(isCorrect){fbSco++;document.getElementById('fbSc').textContent=fbSco;}
+  // Fill the blank
+  const blankEl=document.getElementById('fbBlankEl');
+  if(blankEl){blankEl.textContent=chosen;blankEl.className='fb-blank filled';}
+  // Style buttons
+  optsEl.querySelectorAll('.fb-opt').forEach(b=>{
+    b.classList.add('off');
+    if(b.textContent===correct)b.classList.add('ok');
+    else if(b===el&&!isCorrect)b.classList.add('no');
+  });
+  const fb=document.getElementById('fbFb');
+  fb.className='fb-fb '+(isCorrect?'ok':'no');
+  fb.textContent=isCorrect?'✅ ممتاز! الإجابة صحيحة':'❌ الكلمة الصحيحة: '+correct;
+  document.getElementById('fbNxt').classList.add('on');
+}
+
+function fbNext(){
+  fbQI++;
+  document.getElementById('fbNxt').classList.remove('on');
+  if(fbQI>=fbQs.length){fbShowResult();return;}
+  fbRenderQ();
+}
+
+function fbShowResult(){
+  const stars=fbSco>=4?'⭐⭐⭐':fbSco>=3?'⭐⭐':fbSco>=2?'⭐':'';
+  const msgs=['تحتاج مزيداً من التعلم! 💪','جيد جداً! 👍','ممتاز! 🌟','مثالي! ما شاء الله! 🎯'];
+  const mi=fbSco<=0?0:fbSco<=1?1:fbSco<=3?2:3;
+  document.getElementById('fbGrSc').textContent=fbSco+'/4';
+  document.getElementById('fbGrMsg').textContent=msgs[mi];
+  document.getElementById('fbGrStars').textContent=stars;
+  document.getElementById('fb-gr').classList.add('on');
+  if(fbSco>=3)confetti();
+}
+
+function fbRestart(){document.getElementById('fb-gr').classList.remove('on');fbInit();}
+
+/* =========================================
+   CONFETTI
+========================================= */
+function confetti(){
+  const cv=document.getElementById('fx');
+  const ctx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const t=THEMES[activeTab];
+  const cols=[t.accent,'#f5c518','#ffffff',t.accent2,'#2d7a4f','#ff8c42'];
+  const ps=Array.from({length:80},()=>({
+    x:Math.random()*cv.width,y:-12,
+    w:Math.random()*9+4,h:Math.random()*5+3,
+    c:cols[Math.floor(Math.random()*cols.length)],
+    sp:Math.random()*2.5+1.5,ang:Math.random()*360,spin:Math.random()*7-3.5
+  }));
+  let fr=0;
+  (function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ps.forEach(p=>{
+      p.y+=p.sp;p.x+=Math.sin(fr/18+p.ang)*1.5;p.ang+=p.spin;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.ang*Math.PI/180);
+      ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+    });
+    fr++;if(fr<150)requestAnimationFrame(draw);else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+/* =========================================
+   INIT
+========================================= */
+function init(){
+  loadAll();
+  applyTheme('sabah');
+  renderAdhkar();
+  renderGames();
+  misharyInit('sabah');
+}
+
+init();
+</script>
+</body>
+</html>
